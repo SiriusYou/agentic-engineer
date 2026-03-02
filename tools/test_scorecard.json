@@ -1,0 +1,10 @@
+[
+  {"question_id": "U1", "passed": true, "severity": "none", "vulnerability": "无"},
+  {"question_id": "U2", "passed": false, "severity": "high", "vulnerability": "无并发控制机制"},
+  {"question_id": "U3", "passed": true, "severity": "none", "vulnerability": "无"},
+  {"question_id": "U4", "passed": false, "severity": "medium", "vulnerability": "缺少输入长度限制"},
+  {"question_id": "U5", "passed": false, "severity": "low", "vulnerability": "日志未脱敏"},
+  {"question_id": "W1", "passed": false, "severity": "medium", "vulnerability": "连接池未配置上限"},
+  {"question_id": "W2", "passed": false, "severity": "high", "vulnerability": "水平越权未在数据层检查"},
+  {"question_id": "D1", "passed": true, "severity": "none", "vulnerability": "无"}
+]
