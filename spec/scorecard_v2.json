@@ -1,0 +1,15 @@
+[
+  {"question_id": "U1", "passed": true, "severity": "none", "vulnerability": "无 — 只读 CLI 工具无资源泄漏风险"},
+  {"question_id": "U2", "passed": true, "severity": "none", "vulnerability": "无 — 只读工具无并发写入场景"},
+  {"question_id": "U3", "passed": true, "severity": "none", "vulnerability": "无 — 单进程工具无分布式事务"},
+  {"question_id": "U4", "passed": true, "severity": "none", "vulnerability": "无 — 不处理任何密钥或敏感数据"},
+  {"question_id": "U5", "passed": true, "severity": "none", "vulnerability": "无 — 仅依赖标准库，无外部服务调用"},
+  {"question_id": "U6", "passed": true, "severity": "none", "vulnerability": "无 — 无持久化存储，不存在数据丢失风险"},
+  {"question_id": "U7", "passed": true, "severity": "none", "vulnerability": "无 — 无持久状态，每次运行独立"},
+  {"question_id": "U8", "passed": true, "severity": "none", "vulnerability": "无 — v2 为每个检查器定义了无数据场景返回值，禁止返回空列表"},
+  {"question_id": "U9", "passed": true, "severity": "none", "vulnerability": "无 — 目标文件集为已知小规模 Markdown 文件"},
+  {"question_id": "U10", "passed": true, "severity": "none", "vulnerability": "无 — v2 要求 FAIL 消息包含 expected/actual 值，有明确格式约定"},
+  {"question_id": "C1", "passed": true, "severity": "none", "vulnerability": "无 — v2 将代码块内路径全部排除，只检查正文 Markdown 链接和行内代码引用"},
+  {"question_id": "C2", "passed": true, "severity": "none", "vulnerability": "无 — v2 为每个文件给出具体正则表达式，限定阿拉伯数字匹配"},
+  {"question_id": "C3", "passed": true, "severity": "none", "vulnerability": "无 — v2 定义按列标题匹配策略，含具体的行分割和清理逻辑"}
+]

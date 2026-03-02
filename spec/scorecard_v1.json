@@ -1,0 +1,15 @@
+[
+  {"question_id": "U1", "passed": true, "severity": "none", "vulnerability": "无 — 只读 CLI 工具无资源泄漏风险"},
+  {"question_id": "U2", "passed": true, "severity": "none", "vulnerability": "无 — 只读工具无并发写入场景"},
+  {"question_id": "U3", "passed": true, "severity": "none", "vulnerability": "无 — 单进程工具无分布式事务"},
+  {"question_id": "U4", "passed": true, "severity": "none", "vulnerability": "无 — 不处理任何密钥或敏感数据"},
+  {"question_id": "U5", "passed": true, "severity": "none", "vulnerability": "无 — 仅依赖标准库，无外部服务调用"},
+  {"question_id": "U6", "passed": true, "severity": "none", "vulnerability": "无 — 无持久化存储，不存在数据丢失风险"},
+  {"question_id": "U7", "passed": true, "severity": "none", "vulnerability": "无 — 无持久状态，每次运行独立"},
+  {"question_id": "U8", "passed": false, "severity": "medium", "vulnerability": "各检查器在目标数据不存在时的行为未定义（如 spec/ 为空时 SpecNamingChecker 返回什么、tracks.md 无 track 条目时 TrackStatusChecker 返回什么）"},
+  {"question_id": "U9", "passed": true, "severity": "none", "vulnerability": "无 — 目标文件集为已知小规模 Markdown 文件，极值输入场景不适用"},
+  {"question_id": "U10", "passed": false, "severity": "medium", "vulnerability": "CheckResult.message 未要求包含实际提取值与期望值（如 ConvergenceChecker 应报告'期望 3，实际提取 5'），排查困难"},
+  {"question_id": "C1", "passed": false, "severity": "high", "vulnerability": "FileRefChecker 路径提取规则无法区分'项目结构描述'（README.md 中应检查的真实路径）和'预期输出描述'（模板中展示 spec/ 将来会有的文件），将产生大量误报"},
+  {"question_id": "C2", "passed": false, "severity": "medium", "vulnerability": "ConvergenceChecker 匹配策略描述为'搜索包含高和中的阈值描述行，提取数字'，未给出具体正则模式，边界情况（如'零个高严重度'文字表述）处理不明确"},
+  {"question_id": "C3", "passed": false, "severity": "medium", "vulnerability": "TrackStatusChecker 表格解析策略未定义（按列位置还是按列标题 Status 匹配），tracks.md 列结构变化时可能误读状态值"}
+]
