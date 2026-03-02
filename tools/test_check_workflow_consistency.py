@@ -51,6 +51,7 @@ class TempProjectMixin:
 # PathResolver
 # ============================================================================
 
+
 class TestResolveRoot(TempProjectMixin, unittest.TestCase):
 
     def test_explicit_root(self):
@@ -83,6 +84,7 @@ class TestResolveRoot(TempProjectMixin, unittest.TestCase):
 # ============================================================================
 # FileRefChecker
 # ============================================================================
+
 
 class TestFileRefChecker(TempProjectMixin, unittest.TestCase):
 
@@ -162,6 +164,7 @@ class TestFileRefChecker(TempProjectMixin, unittest.TestCase):
 # ConvergenceChecker
 # ============================================================================
 
+
 class TestConvergenceChecker(TempProjectMixin, unittest.TestCase):
 
     def _setup_baseline(self, threshold=3):
@@ -223,6 +226,7 @@ class TestConvergenceChecker(TempProjectMixin, unittest.TestCase):
 # StepNamingChecker
 # ============================================================================
 
+
 class TestStepNamingChecker(TempProjectMixin, unittest.TestCase):
 
     def test_correct_names(self):
@@ -274,6 +278,7 @@ class TestStepNamingChecker(TempProjectMixin, unittest.TestCase):
 # SpecNamingChecker
 # ============================================================================
 
+
 class TestSpecNamingChecker(TempProjectMixin, unittest.TestCase):
 
     def test_valid_names(self):
@@ -314,6 +319,7 @@ class TestSpecNamingChecker(TempProjectMixin, unittest.TestCase):
 # ============================================================================
 # TrackStatusChecker
 # ============================================================================
+
 
 class TestTrackStatusChecker(TempProjectMixin, unittest.TestCase):
 
@@ -374,6 +380,7 @@ class TestTrackStatusChecker(TempProjectMixin, unittest.TestCase):
 # QuestionIdChecker
 # ============================================================================
 
+
 class TestQuestionIdChecker(TempProjectMixin, unittest.TestCase):
 
     def _write_complete_prompts(self):
@@ -388,10 +395,26 @@ class TestQuestionIdChecker(TempProjectMixin, unittest.TestCase):
         lines.append("\n| 新编号 | 旧编号 | 层级 |")
         lines.append("|-------|--------|------|")
         mapping = [
-            ("U1", "Q3"), ("U2", "Q4"), ("U3", "Q5"), ("U4", "Q10"), ("U5", "Q14"),
-            ("U6", "Q15"), ("U7", "Q16"), ("U8", "Q17"), ("U9", "Q18"), ("U10", "Q20"),
-            ("W1", "Q1"), ("W2", "Q7"), ("W3", "Q8"), ("W4", "Q9"), ("W5", "Q11"),
-            ("D1", "Q2"), ("D2", "Q6"), ("D3", "Q12"), ("D4", "Q13"), ("D5", "Q19"),
+            ("U1", "Q3"),
+            ("U2", "Q4"),
+            ("U3", "Q5"),
+            ("U4", "Q10"),
+            ("U5", "Q14"),
+            ("U6", "Q15"),
+            ("U7", "Q16"),
+            ("U8", "Q17"),
+            ("U9", "Q18"),
+            ("U10", "Q20"),
+            ("W1", "Q1"),
+            ("W2", "Q7"),
+            ("W3", "Q8"),
+            ("W4", "Q9"),
+            ("W5", "Q11"),
+            ("D1", "Q2"),
+            ("D2", "Q6"),
+            ("D3", "Q12"),
+            ("D4", "Q13"),
+            ("D5", "Q19"),
         ]
         for new, old in mapping:
             lines.append(f"| {new} | {old} | test |")
@@ -431,6 +454,7 @@ class TestQuestionIdChecker(TempProjectMixin, unittest.TestCase):
 # run_checks
 # ============================================================================
 
+
 class TestRunChecks(TempProjectMixin, unittest.TestCase):
 
     def test_filter_by_name(self):
@@ -450,47 +474,58 @@ class TestRunChecks(TempProjectMixin, unittest.TestCase):
 # ReportFormatter
 # ============================================================================
 
+
 class TestFormatReport(unittest.TestCase):
 
     def _make_report(self, results):
         return CheckReport(results=results, timestamp="2026-03-02")
 
     def test_summary_format(self):
-        report = self._make_report([
-            CheckResult("test", Severity.PASS, "f.md", 1, "ok"),
-            CheckResult("test", Severity.FAIL, "f.md", 2, "bad"),
-        ])
+        report = self._make_report(
+            [
+                CheckResult("test", Severity.PASS, "f.md", 1, "ok"),
+                CheckResult("test", Severity.FAIL, "f.md", 2, "bad"),
+            ]
+        )
         output = format_report(report, fmt="summary")
         self.assertEqual(output, "1 passed, 1 failed, 0 warnings")
 
     def test_markdown_format_has_header(self):
-        report = self._make_report([
-            CheckResult("test", Severity.PASS, "f.md", 1, "ok"),
-        ])
+        report = self._make_report(
+            [
+                CheckResult("test", Severity.PASS, "f.md", 1, "ok"),
+            ]
+        )
         output = format_report(report, fmt="markdown")
         self.assertIn("## 文档一致性检查报告", output)
         self.assertIn("通过: 1 个", output)
 
     def test_markdown_shows_fails(self):
-        report = self._make_report([
-            CheckResult("test", Severity.FAIL, "f.md", 10, "broken ref"),
-        ])
+        report = self._make_report(
+            [
+                CheckResult("test", Severity.FAIL, "f.md", 10, "broken ref"),
+            ]
+        )
         output = format_report(report, fmt="markdown")
         self.assertIn("### 失败项", output)
         self.assertIn("broken ref", output)
 
     def test_verbose_shows_passes(self):
-        report = self._make_report([
-            CheckResult("test", Severity.PASS, "f.md", 1, "all good"),
-        ])
+        report = self._make_report(
+            [
+                CheckResult("test", Severity.PASS, "f.md", 1, "all good"),
+            ]
+        )
         output = format_report(report, fmt="markdown", verbose=True)
         self.assertIn("### 通过项", output)
         self.assertIn("all good", output)
 
     def test_non_verbose_hides_passes(self):
-        report = self._make_report([
-            CheckResult("test", Severity.PASS, "f.md", 1, "all good"),
-        ])
+        report = self._make_report(
+            [
+                CheckResult("test", Severity.PASS, "f.md", 1, "all good"),
+            ]
+        )
         output = format_report(report, fmt="markdown", verbose=False)
         self.assertNotIn("### 通过项", output)
 
@@ -498,6 +533,7 @@ class TestFormatReport(unittest.TestCase):
 # ============================================================================
 # ExitCode
 # ============================================================================
+
 
 class TestExitCodes(TempProjectMixin, unittest.TestCase):
 

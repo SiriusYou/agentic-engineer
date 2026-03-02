@@ -13,6 +13,7 @@ from pathlib import Path
 # Exit codes (aligned with scorecard_parser)
 # ---------------------------------------------------------------------------
 
+
 class ExitCode:
     SUCCESS = 0
     VALIDATION_ERROR = 1
@@ -22,6 +23,7 @@ class ExitCode:
 # ---------------------------------------------------------------------------
 # Data types
 # ---------------------------------------------------------------------------
+
 
 class Severity(Enum):
     PASS = "pass"
@@ -79,13 +81,17 @@ def resolve_root(cli_root=None):
             break
         current = parent
 
-    print("Error: project root not found (no ancestor contains plan/ and skills/)", file=sys.stderr)
+    print(
+        "Error: project root not found (no ancestor contains plan/ and skills/)",
+        file=sys.stderr,
+    )
     sys.exit(ExitCode.FILE_ERROR)
 
 
 # ---------------------------------------------------------------------------
 # Base checker
 # ---------------------------------------------------------------------------
+
 
 class BaseChecker:
     name = ""
@@ -128,19 +134,29 @@ class FileRefChecker(BaseChecker):
         results = []
         files = self._collect_files(root)
         if not files:
-            return [CheckResult(
-                self.name, Severity.WARNING, "", 0,
-                "No Markdown files found to scan for path references",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.WARNING,
+                    "",
+                    0,
+                    "No Markdown files found to scan for path references",
+                )
+            ]
 
         found_any = False
         for md_file in files:
             lines, err = self._read_file(md_file)
             if err:
-                results.append(CheckResult(
-                    self.name, Severity.WARNING, str(md_file.relative_to(root)), 0,
-                    f"Cannot read file: {err}",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.WARNING,
+                        str(md_file.relative_to(root)),
+                        0,
+                        f"Cannot read file: {err}",
+                    )
+                )
                 continue
 
             refs = self._extract_refs(lines, md_file, root)
@@ -154,23 +170,36 @@ class FileRefChecker(BaseChecker):
                     full_path = root / ref_path
                     display_path = ref_path
                 if not full_path.exists():
-                    results.append(CheckResult(
-                        self.name, Severity.FAIL,
-                        str(md_file.relative_to(root)), line_num,
-                        f"Broken reference: expected {display_path} to exist, found missing",
-                    ))
+                    results.append(
+                        CheckResult(
+                            self.name,
+                            Severity.FAIL,
+                            str(md_file.relative_to(root)),
+                            line_num,
+                            f"Broken reference: expected {display_path} to exist, found missing",
+                        )
+                    )
                 else:
-                    results.append(CheckResult(
-                        self.name, Severity.PASS,
-                        str(md_file.relative_to(root)), line_num,
-                        f"Reference {display_path} exists",
-                    ))
+                    results.append(
+                        CheckResult(
+                            self.name,
+                            Severity.PASS,
+                            str(md_file.relative_to(root)),
+                            line_num,
+                            f"Reference {display_path} exists",
+                        )
+                    )
 
         if not found_any and not results:
-            results.append(CheckResult(
-                self.name, Severity.PASS, "", 0,
-                "No file path references found in scanned documents",
-            ))
+            results.append(
+                CheckResult(
+                    self.name,
+                    Severity.PASS,
+                    "",
+                    0,
+                    "No file path references found in scanned documents",
+                )
+            )
 
         return results
 
@@ -247,17 +276,27 @@ class ConvergenceChecker(BaseChecker):
         # Extract baseline from scorecard_parser.py
         source_path = root / self.SOURCE_FILE
         if not source_path.exists():
-            return [CheckResult(
-                self.name, Severity.FAIL, self.SOURCE_FILE, 0,
-                "Convergence threshold source file missing: expected tools/scorecard_parser.py to exist",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.SOURCE_FILE,
+                    0,
+                    "Convergence threshold source file missing: expected tools/scorecard_parser.py to exist",
+                )
+            ]
 
         lines, err = self._read_file(source_path)
         if err:
-            return [CheckResult(
-                self.name, Severity.FAIL, self.SOURCE_FILE, 0,
-                f"Cannot read source file: {err}",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.SOURCE_FILE,
+                    0,
+                    f"Cannot read source file: {err}",
+                )
+            ]
 
         baseline = None
         baseline_line = 0
@@ -269,32 +308,52 @@ class ConvergenceChecker(BaseChecker):
                 break
 
         if baseline is None:
-            return [CheckResult(
-                self.name, Severity.FAIL, self.SOURCE_FILE, 0,
-                "Cannot extract MEDIUM_CONVERGENCE_THRESHOLD from scorecard_parser.py",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.SOURCE_FILE,
+                    0,
+                    "Cannot extract MEDIUM_CONVERGENCE_THRESHOLD from scorecard_parser.py",
+                )
+            ]
 
-        results.append(CheckResult(
-            self.name, Severity.PASS, self.SOURCE_FILE, baseline_line,
-            f"Baseline convergence threshold extracted: {baseline}",
-        ))
+        results.append(
+            CheckResult(
+                self.name,
+                Severity.PASS,
+                self.SOURCE_FILE,
+                baseline_line,
+                f"Baseline convergence threshold extracted: {baseline}",
+            )
+        )
 
         # Check each documentation file
         for rel_path, pattern in self.CHECK_FILES:
             file_path = root / rel_path
             if not file_path.exists():
-                results.append(CheckResult(
-                    self.name, Severity.FAIL, rel_path, 0,
-                    f"Convergence threshold reference file missing: expected {rel_path} to exist",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.FAIL,
+                        rel_path,
+                        0,
+                        f"Convergence threshold reference file missing: expected {rel_path} to exist",
+                    )
+                )
                 continue
 
             doc_lines, err = self._read_file(file_path)
             if err:
-                results.append(CheckResult(
-                    self.name, Severity.WARNING, rel_path, 0,
-                    f"Cannot read file: {err}",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.WARNING,
+                        rel_path,
+                        0,
+                        f"Cannot read file: {err}",
+                    )
+                )
                 continue
 
             found = False
@@ -306,27 +365,47 @@ class ConvergenceChecker(BaseChecker):
                     found = True
 
                     if medium_val != baseline:
-                        results.append(CheckResult(
-                            self.name, Severity.FAIL, rel_path, j,
-                            f"Convergence threshold mismatch: expected medium={baseline}, found medium={medium_val}",
-                        ))
+                        results.append(
+                            CheckResult(
+                                self.name,
+                                Severity.FAIL,
+                                rel_path,
+                                j,
+                                f"Convergence threshold mismatch: expected medium={baseline}, found medium={medium_val}",
+                            )
+                        )
                     elif high_val != 0:
-                        results.append(CheckResult(
-                            self.name, Severity.FAIL, rel_path, j,
-                            f"Convergence threshold mismatch: expected high=0, found high={high_val}",
-                        ))
+                        results.append(
+                            CheckResult(
+                                self.name,
+                                Severity.FAIL,
+                                rel_path,
+                                j,
+                                f"Convergence threshold mismatch: expected high=0, found high={high_val}",
+                            )
+                        )
                     else:
-                        results.append(CheckResult(
-                            self.name, Severity.PASS, rel_path, j,
-                            f"Convergence threshold consistent (0 high + {medium_val} medium)",
-                        ))
+                        results.append(
+                            CheckResult(
+                                self.name,
+                                Severity.PASS,
+                                rel_path,
+                                j,
+                                f"Convergence threshold consistent (0 high + {medium_val} medium)",
+                            )
+                        )
                     break
 
             if not found:
-                results.append(CheckResult(
-                    self.name, Severity.WARNING, rel_path, 0,
-                    f"Cannot extract convergence threshold from {rel_path}",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.WARNING,
+                        rel_path,
+                        0,
+                        f"Cannot extract convergence threshold from {rel_path}",
+                    )
+                )
 
         return results
 
@@ -370,18 +449,28 @@ class StepNamingChecker(BaseChecker):
         for rel_path in self.SCAN_FILES:
             file_path = root / rel_path
             if not file_path.exists():
-                results.append(CheckResult(
-                    self.name, Severity.WARNING, rel_path, 0,
-                    f"File not found, skipping step naming check: {rel_path}",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.WARNING,
+                        rel_path,
+                        0,
+                        f"File not found, skipping step naming check: {rel_path}",
+                    )
+                )
                 continue
 
             lines, err = self._read_file(file_path)
             if err:
-                results.append(CheckResult(
-                    self.name, Severity.WARNING, rel_path, 0,
-                    f"Cannot read file: {err}",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.WARNING,
+                        rel_path,
+                        0,
+                        f"Cannot read file: {err}",
+                    )
+                )
                 continue
 
             in_code_block = False
@@ -409,15 +498,25 @@ class StepNamingChecker(BaseChecker):
                         continue
                     all_valid = {canonical} | aliases
                     if not any(found_name.startswith(valid) for valid in all_valid):
-                        results.append(CheckResult(
-                            self.name, Severity.FAIL, rel_path, i,
-                            f"Step {step_num} naming: expected '{canonical}' (or aliases), found '{found_name}'",
-                        ))
+                        results.append(
+                            CheckResult(
+                                self.name,
+                                Severity.FAIL,
+                                rel_path,
+                                i,
+                                f"Step {step_num} naming: expected '{canonical}' (or aliases), found '{found_name}'",
+                            )
+                        )
                     else:
-                        results.append(CheckResult(
-                            self.name, Severity.PASS, rel_path, i,
-                            f"Step {step_num} naming consistent: '{found_name}'",
-                        ))
+                        results.append(
+                            CheckResult(
+                                self.name,
+                                Severity.PASS,
+                                rel_path,
+                                i,
+                                f"Step {step_num} naming consistent: '{found_name}'",
+                            )
+                        )
 
                 # Check Phase N patterns
                 for m in _PHASE_RE.finditer(line):
@@ -429,26 +528,50 @@ class StepNamingChecker(BaseChecker):
                         continue
                     all_valid = {canonical} | aliases
                     if not any(found_name.startswith(valid) for valid in all_valid):
-                        results.append(CheckResult(
-                            self.name, Severity.FAIL, rel_path, i,
-                            f"Phase {phase_num} naming: expected '{canonical}' (or aliases), found '{found_name}'",
-                        ))
+                        results.append(
+                            CheckResult(
+                                self.name,
+                                Severity.FAIL,
+                                rel_path,
+                                i,
+                                f"Phase {phase_num} naming: expected '{canonical}' (or aliases), found '{found_name}'",
+                            )
+                        )
                     else:
-                        results.append(CheckResult(
-                            self.name, Severity.PASS, rel_path, i,
-                            f"Phase {phase_num} naming consistent: '{found_name}'",
-                        ))
+                        results.append(
+                            CheckResult(
+                                self.name,
+                                Severity.PASS,
+                                rel_path,
+                                i,
+                                f"Phase {phase_num} naming consistent: '{found_name}'",
+                            )
+                        )
 
         if not any_checked and not results:
-            results.append(CheckResult(
-                self.name, Severity.PASS, "", 0,
-                "No Step/Phase naming patterns found in scanned documents",
-            ))
+            results.append(
+                CheckResult(
+                    self.name,
+                    Severity.PASS,
+                    "",
+                    0,
+                    "No Step/Phase naming patterns found in scanned documents",
+                )
+            )
 
-        return results if results else [CheckResult(
-            self.name, Severity.PASS, "", 0,
-            "Step and Phase naming check completed",
-        )]
+        return (
+            results
+            if results
+            else [
+                CheckResult(
+                    self.name,
+                    Severity.PASS,
+                    "",
+                    0,
+                    "Step and Phase naming check completed",
+                )
+            ]
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -476,31 +599,51 @@ class SpecNamingChecker(BaseChecker):
         spec_dir = root / "spec"
 
         if not spec_dir.is_dir():
-            return [CheckResult(
-                self.name, Severity.WARNING, "spec/", 0,
-                "spec/ directory does not exist",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.WARNING,
+                    "spec/",
+                    0,
+                    "spec/ directory does not exist",
+                )
+            ]
 
         files = [f for f in sorted(spec_dir.iterdir()) if f.is_file()]
         if not files:
-            return [CheckResult(
-                self.name, Severity.PASS, "spec/", 0,
-                "spec/ directory is empty, no files to check",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.PASS,
+                    "spec/",
+                    0,
+                    "spec/ directory is empty, no files to check",
+                )
+            ]
 
         results = []
         for f in files:
             name = f.name
             if any(p.match(name) for p in _SPEC_NAME_PATTERNS):
-                results.append(CheckResult(
-                    self.name, Severity.PASS, f"spec/{name}", 0,
-                    f"File name '{name}' matches naming convention",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.PASS,
+                        f"spec/{name}",
+                        0,
+                        f"File name '{name}' matches naming convention",
+                    )
+                )
             else:
-                results.append(CheckResult(
-                    self.name, Severity.WARNING, f"spec/{name}", 0,
-                    f"File name '{name}' does not match any known spec naming pattern",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.WARNING,
+                        f"spec/{name}",
+                        0,
+                        f"File name '{name}' does not match any known spec naming pattern",
+                    )
+                )
 
         return results
 
@@ -520,64 +663,109 @@ class TrackStatusChecker(BaseChecker):
     def run(self, root):
         file_path = root / self.FILE
         if not file_path.exists():
-            return [CheckResult(
-                self.name, Severity.FAIL, self.FILE, 0,
-                "Track registry file missing: expected conductor/tracks.md to exist",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.FILE,
+                    0,
+                    "Track registry file missing: expected conductor/tracks.md to exist",
+                )
+            ]
 
         lines, err = self._read_file(file_path)
         if err:
-            return [CheckResult(
-                self.name, Severity.FAIL, self.FILE, 0,
-                f"Cannot read file: {err}",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.FILE,
+                    0,
+                    f"Cannot read file: {err}",
+                )
+            ]
 
         results = []
         table_rows = self._parse_table(lines)
 
         if table_rows is None:
-            return [CheckResult(
-                self.name, Severity.FAIL, self.FILE, 0,
-                "No track registry table found in tracks.md",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.FILE,
+                    0,
+                    "No track registry table found in tracks.md",
+                )
+            ]
 
         if not table_rows:
-            return [CheckResult(
-                self.name, Severity.PASS, self.FILE, 0,
-                "No registered tracks in table",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.PASS,
+                    self.FILE,
+                    0,
+                    "No registered tracks in table",
+                )
+            ]
 
         for status, track_id, line_num in table_rows:
             status_lower = status.strip().lower()
             if status_lower not in VALID_TRACK_STATUSES:
-                results.append(CheckResult(
-                    self.name, Severity.FAIL, self.FILE, line_num,
-                    f"Invalid track status: expected one of {sorted(VALID_TRACK_STATUSES)}, found '{status}'",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.FAIL,
+                        self.FILE,
+                        line_num,
+                        f"Invalid track status: expected one of {sorted(VALID_TRACK_STATUSES)}, found '{status}'",
+                    )
+                )
             else:
-                results.append(CheckResult(
-                    self.name, Severity.PASS, self.FILE, line_num,
-                    f"Track {track_id} status '{status_lower}' is valid",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.PASS,
+                        self.FILE,
+                        line_num,
+                        f"Track {track_id} status '{status_lower}' is valid",
+                    )
+                )
 
             # Check detail section consistency
             detail_status, detail_line = self._find_detail_status(lines, track_id)
             if detail_status is None:
-                results.append(CheckResult(
-                    self.name, Severity.WARNING, self.FILE, 0,
-                    f"Track {track_id}: no detail status line found (expected **状态：** ...)",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.WARNING,
+                        self.FILE,
+                        0,
+                        f"Track {track_id}: no detail status line found (expected **状态：** ...)",
+                    )
+                )
             elif detail_status.lower() != status_lower:
-                results.append(CheckResult(
-                    self.name, Severity.FAIL, self.FILE, detail_line,
-                    f"Track {track_id} status inconsistency: table says '{status_lower}', "
-                    f"detail says '{detail_status}'",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.FAIL,
+                        self.FILE,
+                        detail_line,
+                        f"Track {track_id} status inconsistency: table says '{status_lower}', "
+                        f"detail says '{detail_status}'",
+                    )
+                )
             else:
-                results.append(CheckResult(
-                    self.name, Severity.PASS, self.FILE, detail_line,
-                    f"Track {track_id} table/detail status consistent: '{status_lower}'",
-                ))
+                results.append(
+                    CheckResult(
+                        self.name,
+                        Severity.PASS,
+                        self.FILE,
+                        detail_line,
+                        f"Track {track_id} table/detail status consistent: '{status_lower}'",
+                    )
+                )
 
         return results
 
@@ -621,7 +809,11 @@ class TrackStatusChecker(BaseChecker):
                 continue
 
             status_val = cells[status_col] if status_col < len(cells) else ""
-            track_id_val = cells[track_id_col] if track_id_col is not None and track_id_col < len(cells) else ""
+            track_id_val = (
+                cells[track_id_col]
+                if track_id_col is not None and track_id_col < len(cells)
+                else ""
+            )
             rows.append((status_val, track_id_val, i + 1))
 
         return rows if header_found else None
@@ -666,17 +858,27 @@ class QuestionIdChecker(BaseChecker):
     def run(self, root):
         file_path = root / self.FILE
         if not file_path.exists():
-            return [CheckResult(
-                self.name, Severity.WARNING, self.FILE, 0,
-                "stress-test-prompts.md missing, skipping question ID check",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.WARNING,
+                    self.FILE,
+                    0,
+                    "stress-test-prompts.md missing, skipping question ID check",
+                )
+            ]
 
         lines, err = self._read_file(file_path)
         if err:
-            return [CheckResult(
-                self.name, Severity.WARNING, self.FILE, 0,
-                f"Cannot read file: {err}",
-            )]
+            return [
+                CheckResult(
+                    self.name,
+                    Severity.WARNING,
+                    self.FILE,
+                    0,
+                    f"Cannot read file: {err}",
+                )
+            ]
 
         found_ids = []
         for i, line in enumerate(lines, 1):
@@ -691,18 +893,28 @@ class QuestionIdChecker(BaseChecker):
         # Check for missing IDs
         missing = expected_set - found_id_set
         if missing:
-            results.append(CheckResult(
-                self.name, Severity.FAIL, self.FILE, 0,
-                f"Missing question IDs: expected {sorted(missing)}, found absent",
-            ))
+            results.append(
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.FILE,
+                    0,
+                    f"Missing question IDs: expected {sorted(missing)}, found absent",
+                )
+            )
 
         # Check for unexpected IDs
         extra = found_id_set - expected_set
         if extra:
-            results.append(CheckResult(
-                self.name, Severity.WARNING, self.FILE, 0,
-                f"Unexpected question IDs found: {sorted(extra)}",
-            ))
+            results.append(
+                CheckResult(
+                    self.name,
+                    Severity.WARNING,
+                    self.FILE,
+                    0,
+                    f"Unexpected question IDs found: {sorted(extra)}",
+                )
+            )
 
         # Check total count matches mapping table
         # The mapping table should have exactly 20 rows
@@ -721,21 +933,36 @@ class QuestionIdChecker(BaseChecker):
                     in_mapping = False
 
         if mapping_count != len(EXPECTED_IDS):
-            results.append(CheckResult(
-                self.name, Severity.FAIL, self.FILE, 0,
-                f"Mapping table row count: expected {len(EXPECTED_IDS)}, found {mapping_count}",
-            ))
+            results.append(
+                CheckResult(
+                    self.name,
+                    Severity.FAIL,
+                    self.FILE,
+                    0,
+                    f"Mapping table row count: expected {len(EXPECTED_IDS)}, found {mapping_count}",
+                )
+            )
         else:
-            results.append(CheckResult(
-                self.name, Severity.PASS, self.FILE, 0,
-                f"Mapping table has correct row count: {mapping_count}",
-            ))
+            results.append(
+                CheckResult(
+                    self.name,
+                    Severity.PASS,
+                    self.FILE,
+                    0,
+                    f"Mapping table has correct row count: {mapping_count}",
+                )
+            )
 
         if not missing and not extra:
-            results.append(CheckResult(
-                self.name, Severity.PASS, self.FILE, 0,
-                f"All {len(EXPECTED_IDS)} question IDs present and complete",
-            ))
+            results.append(
+                CheckResult(
+                    self.name,
+                    Severity.PASS,
+                    self.FILE,
+                    0,
+                    f"All {len(EXPECTED_IDS)} question IDs present and complete",
+                )
+            )
 
         return results
 
@@ -767,10 +994,15 @@ def run_checks(root, checker_names=None):
             results = checker.run(root)
             all_results.extend(results)
         except Exception as e:
-            all_results.append(CheckResult(
-                checker.name, Severity.WARNING, "", 0,
-                f"Checker {checker.name} raised unexpected error: {e}",
-            ))
+            all_results.append(
+                CheckResult(
+                    checker.name,
+                    Severity.WARNING,
+                    "",
+                    0,
+                    f"Checker {checker.name} raised unexpected error: {e}",
+                )
+            )
 
     return CheckReport(results=all_results)
 
@@ -778,6 +1010,7 @@ def run_checks(root, checker_names=None):
 # ---------------------------------------------------------------------------
 # ReportFormatter
 # ---------------------------------------------------------------------------
+
 
 def format_report(report, fmt="markdown", verbose=False):
     """Format CheckReport as string."""
@@ -803,12 +1036,14 @@ def format_report(report, fmt="markdown", verbose=False):
     # Failed items
     fails = [r for r in report.results if r.severity == Severity.FAIL]
     if fails:
-        lines.extend([
-            "",
-            "### 失败项",
-            "| 检查器 | 文件 | 行号 | 描述 |",
-            "|--------|------|------|------|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### 失败项",
+                "| 检查器 | 文件 | 行号 | 描述 |",
+                "|--------|------|------|------|",
+            ]
+        )
         for r in fails:
             ln = str(r.line_number) if r.line_number > 0 else "-"
             lines.append(f"| {r.checker} | {r.file_path} | {ln} | {r.message} |")
@@ -816,12 +1051,14 @@ def format_report(report, fmt="markdown", verbose=False):
     # Warning items
     warns = [r for r in report.results if r.severity == Severity.WARNING]
     if warns:
-        lines.extend([
-            "",
-            "### 警告项",
-            "| 检查器 | 文件 | 描述 |",
-            "|--------|------|------|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### 警告项",
+                "| 检查器 | 文件 | 描述 |",
+                "|--------|------|------|",
+            ]
+        )
         for r in warns:
             lines.append(f"| {r.checker} | {r.file_path} | {r.message} |")
 
@@ -829,12 +1066,14 @@ def format_report(report, fmt="markdown", verbose=False):
     if verbose:
         passes = [r for r in report.results if r.severity == Severity.PASS]
         if passes:
-            lines.extend([
-                "",
-                "### 通过项",
-                "| 检查器 | 文件 | 行号 | 描述 |",
-                "|--------|------|------|------|",
-            ])
+            lines.extend(
+                [
+                    "",
+                    "### 通过项",
+                    "| 检查器 | 文件 | 行号 | 描述 |",
+                    "|--------|------|------|------|",
+                ]
+            )
             for r in passes:
                 ln = str(r.line_number) if r.line_number > 0 else "-"
                 lines.append(f"| {r.checker} | {r.file_path} | {ln} | {r.message} |")
@@ -846,25 +1085,32 @@ def format_report(report, fmt="markdown", verbose=False):
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def create_parser():
     parser = argparse.ArgumentParser(
         description="Check agentic-engineer documentation for cross-file consistency.",
     )
     parser.add_argument(
-        "--root", default=None,
+        "--root",
+        default=None,
         help="Project root directory (default: auto-detect)",
     )
     parser.add_argument(
-        "--check", default=None,
+        "--check",
+        default=None,
         help="Only run specified checkers, comma-separated "
-             "(file_ref,convergence,step_naming,spec_naming,track_status,question_id)",
+        "(file_ref,convergence,step_naming,spec_naming,track_status,question_id)",
     )
     parser.add_argument(
-        "--format", dest="fmt", default="markdown", choices=["markdown", "summary"],
+        "--format",
+        dest="fmt",
+        default="markdown",
+        choices=["markdown", "summary"],
         help="Output format (default: markdown)",
     )
     parser.add_argument(
-        "--verbose", action="store_true",
+        "--verbose",
+        action="store_true",
         help="Show all check results including passed items",
     )
     return parser
