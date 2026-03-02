@@ -20,13 +20,31 @@ from tools.scorecard_parser import (
     generate_markdown,
     main,
     parse_scorecard,
+    sanitize_markdown,
     sort_key,
     validate_entry,
 )
 
 
+class _TempDirMixin:
+    """Mixin that provides auto-cleaned temporary directory for test classes."""
+
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def _write_temp_json(self, data, filename="scorecard.json"):
+        """Write data to a temporary JSON file and return its path."""
+        filepath = os.path.join(self._tmpdir.name, filename)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        return filepath
+
+
 def _write_temp_json(data, filename="scorecard.json"):
-    """Write data to a temporary JSON file and return its path."""
+    """Write data to a temporary JSON file and return its path (legacy helper)."""
     tmpdir = tempfile.mkdtemp()
     filepath = os.path.join(tmpdir, filename)
     with open(filepath, "w", encoding="utf-8") as f:
@@ -650,6 +668,64 @@ class TestMainCLI(unittest.TestCase):
         self.assertEqual(result, ExitCode.SUCCESS)
         output = captured_stdout.getvalue()
         self.assertIn("Spec 版本: unknown", output)
+
+
+class TestSanitizeMarkdown(unittest.TestCase):
+    """Test Markdown sanitization."""
+
+    def test_pipe_escaped(self):
+        self.assertEqual(sanitize_markdown("a | b"), "a \\| b")
+
+    def test_newlines_replaced(self):
+        self.assertEqual(sanitize_markdown("line1\nline2"), "line1 line2")
+
+    def test_html_escaped(self):
+        self.assertEqual(sanitize_markdown("<script>"), "&lt;script&gt;")
+
+    def test_plain_text_unchanged(self):
+        self.assertEqual(sanitize_markdown("无并发控制"), "无并发控制")
+
+
+class TestTypeValidation(unittest.TestCase):
+    """Test type validation on entry fields."""
+
+    def test_passed_non_boolean_rejected(self):
+        entry = {"question_id": "U1", "passed": "yes", "severity": "none", "vulnerability": "无"}
+        errors = validate_entry(entry, 0)
+        self.assertTrue(any("expected boolean" in e for e in errors))
+
+    def test_passed_integer_rejected(self):
+        entry = {"question_id": "U1", "passed": 1, "severity": "none", "vulnerability": "无"}
+        errors = validate_entry(entry, 0)
+        self.assertTrue(any("expected boolean" in e for e in errors))
+
+    def test_question_id_non_string_rejected(self):
+        entry = {"question_id": 42, "passed": True, "severity": "none", "vulnerability": "无"}
+        errors = validate_entry(entry, 0)
+        self.assertTrue(any("expected string" in e for e in errors))
+
+    def test_vulnerability_non_string_rejected(self):
+        entry = {"question_id": "U1", "passed": True, "severity": "none", "vulnerability": 123}
+        errors = validate_entry(entry, 0)
+        self.assertTrue(any("expected string" in e for e in errors))
+
+    def test_valid_types_accepted(self):
+        entry = {"question_id": "U1", "passed": True, "severity": "none", "vulnerability": "无"}
+        errors = validate_entry(entry, 0)
+        self.assertEqual(errors, [])
+
+
+class TestMarkdownInjection(unittest.TestCase):
+    """Test that pipe chars in vulnerability don't break table."""
+
+    def test_pipe_in_vulnerability_escaped(self):
+        entries = [
+            {"question_id": "U1", "passed": True, "severity": "none", "vulnerability": "a | b"}
+        ]
+        lines = generate_markdown(entries, "v1", "2026-03-02")
+        table_row = [l for l in lines if "U1" in l][0]
+        # Should have escaped pipe, not an extra column
+        self.assertIn("a \\| b", table_row)
 
 
 if __name__ == "__main__":

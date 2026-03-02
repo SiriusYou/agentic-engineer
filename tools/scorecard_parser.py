@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """scorecard_parser: Parse stress test scorecards into Markdown reports."""
 import json
+import re
 import sys
 import argparse
 import datetime
@@ -19,27 +20,20 @@ REQUIRED_FIELDS = frozenset({"question_id", "passed", "severity", "vulnerability
 # Sorting order for question ID prefixes
 PREFIX_ORDER = {"U": 0, "W": 1, "D": 2}
 
+# Convergence threshold: 0 high + at most this many medium = converged
+MEDIUM_CONVERGENCE_THRESHOLD = 3
+
+# Pattern to split question IDs into prefix + number (e.g., "U1" → "U", "1")
+_QID_PATTERN = re.compile(r"^([A-Za-z]*)(\d*)$")
+
 
 def sort_key(entry):
     """Generate sort key: prefix order, then numeric value."""
-    qid = entry["question_id"]
-    prefix = ""
-    num_str = ""
-    for i, ch in enumerate(qid):
-        if ch.isdigit():
-            prefix = qid[:i]
-            num_str = qid[i:]
-            break
-    else:
-        prefix = qid
-        num_str = ""
-
+    qid = entry.get("question_id", "")
+    m = _QID_PATTERN.match(qid)
+    prefix, num_str = (m.group(1), m.group(2)) if m else (qid, "")
     prefix_rank = PREFIX_ORDER.get(prefix, len(PREFIX_ORDER))
-    try:
-        num = int(num_str) if num_str else 0
-    except ValueError:
-        num = 0
-    return (prefix_rank, num)
+    return (prefix_rank, int(num_str) if num_str else 0)
 
 
 def validate_entry(entry, index):
@@ -52,6 +46,17 @@ def validate_entry(entry, index):
     for field in sorted(REQUIRED_FIELDS):
         if field not in entry:
             errors.append(f"entry[{index}].{field}: missing required field")
+
+    for field in ("question_id", "severity", "vulnerability"):
+        if field in entry and not isinstance(entry[field], str):
+            errors.append(
+                f"entry[{index}].{field}: expected string, got {type(entry[field]).__name__}"
+            )
+
+    if "passed" in entry and not isinstance(entry["passed"], bool):
+        errors.append(
+            f"entry[{index}].passed: expected boolean, got {type(entry['passed']).__name__}"
+        )
 
     if "severity" in entry and entry["severity"] not in VALID_SEVERITIES:
         errors.append(
@@ -148,6 +153,18 @@ def parse_scorecard(filepath):
     return data, all_warnings
 
 
+def sanitize_markdown(text):
+    """Escape characters that could break Markdown table structure."""
+    if not isinstance(text, str):
+        text = str(text)
+    text = text.replace("|", "\\|")
+    text = text.replace("\n", " ")
+    text = text.replace("\r", " ")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
+    return text
+
+
 def generate_markdown(entries, version, date_str):
     """Generate the Markdown vulnerability table."""
     sorted_entries = sorted(entries, key=sort_key)
@@ -163,9 +180,10 @@ def generate_markdown(entries, version, date_str):
 
     for entry in sorted_entries:
         icon = "✅" if entry["passed"] else "⚠️"
-        lines.append(
-            f"| {entry['question_id']}  | {icon} | {entry['vulnerability']} | {entry['severity']} |"
-        )
+        qid = sanitize_markdown(entry["question_id"])
+        vuln = sanitize_markdown(entry["vulnerability"])
+        sev = sanitize_markdown(entry["severity"])
+        lines.append(f"| {qid}  | {icon} | {vuln} | {sev} |")
 
     return lines
 
@@ -183,7 +201,7 @@ def generate_convergence(entries):
         "收敛判断:",
     ]
 
-    converged = high_count == 0 and medium_count <= 3
+    converged = high_count == 0 and medium_count <= MEDIUM_CONVERGENCE_THRESHOLD
 
     if converged:
         lines.append(
