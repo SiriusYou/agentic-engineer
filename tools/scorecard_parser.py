@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """scorecard_parser: Parse stress test scorecards into Markdown reports."""
+import argparse
+import datetime
 import json
 import re
 import sys
-import argparse
-import datetime
 from pathlib import Path
 
 

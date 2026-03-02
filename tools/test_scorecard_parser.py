@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Unit tests for scorecard_parser."""
+import atexit
 import io
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -25,27 +27,21 @@ from tools.scorecard_parser import (
     validate_entry,
 )
 
+_temp_dirs = []
 
-class _TempDirMixin:
-    """Mixin that provides auto-cleaned temporary directory for test classes."""
 
-    def setUp(self):
-        self._tmpdir = tempfile.TemporaryDirectory()
+def _cleanup_temp_dirs():
+    for d in _temp_dirs:
+        shutil.rmtree(d, ignore_errors=True)
 
-    def tearDown(self):
-        self._tmpdir.cleanup()
 
-    def _write_temp_json(self, data, filename="scorecard.json"):
-        """Write data to a temporary JSON file and return its path."""
-        filepath = os.path.join(self._tmpdir.name, filename)
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
-        return filepath
+atexit.register(_cleanup_temp_dirs)
 
 
 def _write_temp_json(data, filename="scorecard.json"):
-    """Write data to a temporary JSON file and return its path (legacy helper)."""
+    """Write data to a temporary JSON file and return its path."""
     tmpdir = tempfile.mkdtemp()
+    _temp_dirs.append(tmpdir)
     filepath = os.path.join(tmpdir, filename)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
@@ -446,8 +442,6 @@ class TestGenerateMarkdown(unittest.TestCase):
             },
         ]
         lines = generate_markdown(entries, "v1", "2026-03-02")
-        output = "\n".join(lines)
-        # Check that passed entries get checkmark and failed get warning
         u1_line = [l for l in lines if "U1" in l and l.startswith("|")][0]
         u2_line = [l for l in lines if "U2" in l and l.startswith("|")][0]
         self.assertIn("✅", u1_line)
