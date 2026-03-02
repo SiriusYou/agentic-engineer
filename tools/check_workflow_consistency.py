@@ -229,6 +229,11 @@ class FileRefChecker(BaseChecker):
             # Markdown links: [text](path) — may be same-directory relative
             for match in _MD_LINK_RE.finditer(line):
                 path = match.group(1).strip()
+                # Strip anchor fragments: path/file.md#section → path/file.md
+                if "#" in path:
+                    path = path.split("#")[0]
+                    if not path:
+                        continue
                 if self._is_checkable_path(path):
                     refs.append((path, i, True))
 
@@ -1125,13 +1130,35 @@ def main():
     checker_names = None
     if args.check:
         checker_names = [n.strip() for n in args.check.split(",")]
+        valid_names = {c.name for c in ALL_CHECKERS}
+        invalid = [n for n in checker_names if n not in valid_names]
+        if invalid:
+            print(
+                f"Error: unknown checker(s): {', '.join(invalid)}. "
+                f"Valid checkers: {', '.join(sorted(valid_names))}",
+                file=sys.stderr,
+            )
+            sys.exit(ExitCode.FILE_ERROR)
 
     report = run_checks(root, checker_names)
 
     output = format_report(report, fmt=args.fmt, verbose=args.verbose)
     print(output)
 
-    has_fail = any(r.severity == Severity.FAIL for r in report.results)
+    # Write warnings and failures to stderr (per CLI contract: report→stdout, diagnostics→stderr)
+    has_fail = False
+    for r in report.results:
+        loc = (
+            f"{r.file_path}:{r.line_number}"
+            if r.file_path and r.line_number > 0
+            else (r.file_path or "(global)")
+        )
+        if r.severity == Severity.FAIL:
+            has_fail = True
+            print(f"FAIL [{r.checker}] {loc}: {r.message}", file=sys.stderr)
+        elif r.severity == Severity.WARNING:
+            print(f"WARN [{r.checker}] {loc}: {r.message}", file=sys.stderr)
+
     return ExitCode.VALIDATION_ERROR if has_fail else ExitCode.SUCCESS
 
 

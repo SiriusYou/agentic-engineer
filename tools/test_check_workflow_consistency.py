@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Tests for check_workflow_consistency."""
+import io
 import json
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from tools.check_workflow_consistency import (
     ALL_CHECKERS,
@@ -20,6 +23,7 @@ from tools.check_workflow_consistency import (
     StepNamingChecker,
     TrackStatusChecker,
     format_report,
+    main,
     resolve_root,
     run_checks,
 )
@@ -126,6 +130,23 @@ class TestFileRefChecker(TempProjectMixin, unittest.TestCase):
         results = checker.run(self.root)
         fails = [r for r in results if r.severity == Severity.FAIL]
         self.assertEqual(len(fails), 1)
+
+    def test_anchor_link_strips_fragment(self):
+        self.write_file("README.md", "[ref](plan/quick_reference.md#section)")
+        self.write_file("plan/quick_reference.md", "# Quick Ref")
+        checker = FileRefChecker()
+        results = checker.run(self.root)
+        fails = [r for r in results if r.severity == Severity.FAIL]
+        self.assertEqual(len(fails), 0)
+        passes = [r for r in results if r.severity == Severity.PASS]
+        self.assertTrue(len(passes) >= 1)
+
+    def test_pure_anchor_link_skipped(self):
+        self.write_file("README.md", "See [section](#overview)")
+        checker = FileRefChecker()
+        results = checker.run(self.root)
+        fails = [r for r in results if r.severity == Severity.FAIL]
+        self.assertEqual(len(fails), 0)
 
     def test_skips_urls(self):
         self.write_file("README.md", "See [docs](https://example.com/path.md)")
@@ -469,6 +490,11 @@ class TestRunChecks(TempProjectMixin, unittest.TestCase):
         expected = {c.name for c in ALL_CHECKERS}
         self.assertEqual(checkers_used, expected)
 
+    def test_invalid_checker_name_produces_empty_results(self):
+        """run_checks with unknown name returns empty (main() guards this)."""
+        report = run_checks(self.root, ["typo_checker"])
+        self.assertEqual(len(report.results), 0)
+
 
 # ============================================================================
 # ReportFormatter
@@ -548,6 +574,66 @@ class TestExitCodes(TempProjectMixin, unittest.TestCase):
         report = run_checks(self.root, ["track_status"])
         has_fail = any(r.severity == Severity.FAIL for r in report.results)
         self.assertTrue(has_fail)
+
+
+# ============================================================================
+# CLI: --check validation and stderr output
+# ============================================================================
+
+
+class TestCLIInvalidCheck(TempProjectMixin, unittest.TestCase):
+
+    def test_invalid_checker_name_exits_2(self):
+        with patch(
+            "sys.argv", ["prog", "--root", str(self.root), "--check", "typo_checker"]
+        ):
+            with self.assertRaises(SystemExit) as ctx:
+                main()
+            self.assertEqual(ctx.exception.code, ExitCode.FILE_ERROR)
+
+    def test_mixed_valid_invalid_checker_exits_2(self):
+        with patch(
+            "sys.argv",
+            ["prog", "--root", str(self.root), "--check", "file_ref,bogus"],
+        ):
+            with self.assertRaises(SystemExit) as ctx:
+                main()
+            self.assertEqual(ctx.exception.code, ExitCode.FILE_ERROR)
+
+    def test_valid_checker_name_does_not_exit_2(self):
+        self.write_file("spec/raw_requirements.md", "")
+        with patch(
+            "sys.argv", ["prog", "--root", str(self.root), "--check", "spec_naming"]
+        ):
+            code = main()
+            self.assertEqual(code, ExitCode.SUCCESS)
+
+
+class TestCLIStderrOutput(TempProjectMixin, unittest.TestCase):
+
+    def test_failures_written_to_stderr(self):
+        # Missing tracks.md causes FAIL in track_status checker
+        stderr_capture = io.StringIO()
+        with patch(
+            "sys.argv", ["prog", "--root", str(self.root), "--check", "track_status"]
+        ):
+            with patch("sys.stderr", stderr_capture):
+                code = main()
+        self.assertEqual(code, ExitCode.VALIDATION_ERROR)
+        stderr_output = stderr_capture.getvalue()
+        self.assertIn("FAIL [track_status]", stderr_output)
+
+    def test_no_stderr_on_clean_run(self):
+        self.write_file("spec/raw_requirements.md", "")
+        stderr_capture = io.StringIO()
+        with patch(
+            "sys.argv", ["prog", "--root", str(self.root), "--check", "spec_naming"]
+        ):
+            with patch("sys.stderr", stderr_capture):
+                code = main()
+        self.assertEqual(code, ExitCode.SUCCESS)
+        stderr_output = stderr_capture.getvalue()
+        self.assertEqual(stderr_output, "")
 
 
 if __name__ == "__main__":
