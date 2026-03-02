@@ -126,6 +126,9 @@ def parse_scorecard(filepath):
     except json.JSONDecodeError as e:
         print(f"Error: invalid JSON in {filepath}: {e}", file=sys.stderr)
         sys.exit(ExitCode.VALIDATION_ERROR)
+    except OSError as e:
+        print(f"Error: cannot read file {filepath}: {e}", file=sys.stderr)
+        sys.exit(ExitCode.FILE_ERROR)
 
     if not isinstance(data, list):
         print(

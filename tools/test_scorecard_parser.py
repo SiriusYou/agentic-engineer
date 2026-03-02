@@ -286,6 +286,25 @@ class TestParseScorecard(unittest.TestCase):
             parse_scorecard("/nonexistent/path/file.json")
         self.assertEqual(cm.exception.code, ExitCode.FILE_ERROR)
 
+    def test_unreadable_file_exits_2(self):
+        filepath = _write_temp_json(
+            [
+                {
+                    "question_id": "U1",
+                    "passed": True,
+                    "severity": "none",
+                    "vulnerability": "无",
+                }
+            ]
+        )
+        os.chmod(filepath, 0o000)
+        try:
+            with self.assertRaises(SystemExit) as cm:
+                parse_scorecard(filepath)
+            self.assertEqual(cm.exception.code, ExitCode.FILE_ERROR)
+        finally:
+            os.chmod(filepath, 0o644)
+
     def test_non_array_json_exits_1(self):
         filepath = _write_temp_json({"key": "value"})
         with self.assertRaises(SystemExit) as cm:
@@ -402,7 +421,11 @@ class TestGenerateMarkdown(unittest.TestCase):
         self.assertIn("## 压力测试漏洞记录", output)
         self.assertIn("| 题号 |", output)
         # No data rows beyond the header
-        table_rows = [l for l in lines if l.startswith("| U") or l.startswith("| W") or l.startswith("| D")]
+        table_rows = [
+            l
+            for l in lines
+            if l.startswith("| U") or l.startswith("| W") or l.startswith("| D")
+        ]
         self.assertEqual(len(table_rows), 0)
 
     def test_sorting_in_output(self):
@@ -561,6 +584,26 @@ class TestMainCLI(unittest.TestCase):
                 main()
             self.assertEqual(cm.exception.code, ExitCode.FILE_ERROR)
 
+    def test_unreadable_file_exits_2(self):
+        filepath = _write_temp_json(
+            [
+                {
+                    "question_id": "U1",
+                    "passed": True,
+                    "severity": "none",
+                    "vulnerability": "无",
+                }
+            ]
+        )
+        os.chmod(filepath, 0o000)
+        try:
+            with patch("sys.argv", ["scorecard_parser.py", filepath]):
+                with self.assertRaises(SystemExit) as cm:
+                    main()
+                self.assertEqual(cm.exception.code, ExitCode.FILE_ERROR)
+        finally:
+            os.chmod(filepath, 0o644)
+
     def test_non_array_json_exits_1(self):
         filepath = _write_temp_json({"not": "array"})
         with patch("sys.argv", ["scorecard_parser.py", filepath]):
@@ -684,27 +727,52 @@ class TestTypeValidation(unittest.TestCase):
     """Test type validation on entry fields."""
 
     def test_passed_non_boolean_rejected(self):
-        entry = {"question_id": "U1", "passed": "yes", "severity": "none", "vulnerability": "无"}
+        entry = {
+            "question_id": "U1",
+            "passed": "yes",
+            "severity": "none",
+            "vulnerability": "无",
+        }
         errors = validate_entry(entry, 0)
         self.assertTrue(any("expected boolean" in e for e in errors))
 
     def test_passed_integer_rejected(self):
-        entry = {"question_id": "U1", "passed": 1, "severity": "none", "vulnerability": "无"}
+        entry = {
+            "question_id": "U1",
+            "passed": 1,
+            "severity": "none",
+            "vulnerability": "无",
+        }
         errors = validate_entry(entry, 0)
         self.assertTrue(any("expected boolean" in e for e in errors))
 
     def test_question_id_non_string_rejected(self):
-        entry = {"question_id": 42, "passed": True, "severity": "none", "vulnerability": "无"}
+        entry = {
+            "question_id": 42,
+            "passed": True,
+            "severity": "none",
+            "vulnerability": "无",
+        }
         errors = validate_entry(entry, 0)
         self.assertTrue(any("expected string" in e for e in errors))
 
     def test_vulnerability_non_string_rejected(self):
-        entry = {"question_id": "U1", "passed": True, "severity": "none", "vulnerability": 123}
+        entry = {
+            "question_id": "U1",
+            "passed": True,
+            "severity": "none",
+            "vulnerability": 123,
+        }
         errors = validate_entry(entry, 0)
         self.assertTrue(any("expected string" in e for e in errors))
 
     def test_valid_types_accepted(self):
-        entry = {"question_id": "U1", "passed": True, "severity": "none", "vulnerability": "无"}
+        entry = {
+            "question_id": "U1",
+            "passed": True,
+            "severity": "none",
+            "vulnerability": "无",
+        }
         errors = validate_entry(entry, 0)
         self.assertEqual(errors, [])
 
@@ -714,7 +782,12 @@ class TestMarkdownInjection(unittest.TestCase):
 
     def test_pipe_in_vulnerability_escaped(self):
         entries = [
-            {"question_id": "U1", "passed": True, "severity": "none", "vulnerability": "a | b"}
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "a | b",
+            }
         ]
         lines = generate_markdown(entries, "v1", "2026-03-02")
         table_row = [l for l in lines if "U1" in l][0]
