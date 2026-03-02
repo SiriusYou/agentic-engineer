@@ -100,6 +100,13 @@ spec_final.md → spec_final_v2.md → spec_final_v3.md
 
 ---
 
+## 项目复盘（Phase 0）
+
+项目完成后，使用 `plan/template_00_postmortem.md` 执行复盘。
+记录每步耗时、迭代轮次、严重度下降曲线，收集流程改进数据。
+
+---
+
 ## Claude Code 启动命令
 
 ```
