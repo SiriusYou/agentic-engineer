@@ -18,6 +18,7 @@
 - `spec/raw_requirements.md` — Step 1 灵感捕获
 - `spec/spec_v1.md` — Step 2 SDD
 - `spec/scorecard_v1.json` — Step 3 评分卡
+- `spec/stress_test_v1.md` — Step 3 漏洞记录表
 - `spec/spec_final.md` — 收敛锁定版本
 - `spec/postmortem_v1.md` — Phase 0 复盘
 

@@ -188,21 +188,16 @@ Spec 解析完成：
 
 ---
 
-## ⚠️ 执行前必读：规划阶段流程
+## ⚠️ 执行前必读
 
-> **本 Skill 仅覆盖 Step 5（执行阶段）。在启动执行前，必须确认 Step 1-4 的规划流程已完成。**
+> **本 Skill 仅覆盖 Step 5（执行阶段）。未经规划直接执行 = 违反核心原则。**
 >
-> 完整的规划流程（灵感捕获 → AI 结构化 → 压力测试 → 反馈修正）请参阅 `skills/planning-workflow.md`。
-> 快速参考卡请参阅 `plan/quick_reference.md`。
->
-> **未经规划直接执行 = 无 Spec 执行 = 违反本方法论的核心原则。**
+> 规划流程（Step 1-4）：`skills/planning-workflow.md`
+> 快速参考卡：`plan/quick_reference.md`
 
 ---
 
 ## 参考文档
 
-- `skills/sdd-template.md` — 标准 SDD 文档模板（用于验证 spec 完整性）
-- `skills/stress-test-prompts.md` — 分层对抗性压力测试 Prompt 库（按项目类型组装 10-20 题）
-- `skills/planning-workflow.md` — 规划阶段完整流程（Step 1-4）
-- `plan/quick_reference.md` — 5 步流程快速参考卡
-- `plan/template_00_postmortem.md` — Phase 0 复盘模板（项目完成后使用）
+- `skills/sdd-template.md` — SDD 模板（验证 spec 完整性）
+- `skills/stress-test-prompts.md` — 压力测试 Prompt 库

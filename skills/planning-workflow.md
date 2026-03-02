@@ -111,33 +111,12 @@ SDD 需要包含以下部分：
 
 ## 阶段 5：移交执行
 
-将 `spec_final.md` 交给 Claude Code，并说明：
-```
-请按照 spec-driven-dev 执行规范，实现 spec_final.md 中定义的系统。
-原子化提交，严格对应 Spec 章节，发现歧义立即报告。
-```
+将 `spec_final.md` 交给 Claude Code，按 `skills/SKILL.md` 中的执行规范实施。
+启动命令参见 `plan/quick_reference.md`。
 
 ---
 
-## Phase 0：项目复盘（推荐）
+## 补充流程
 
-项目完成后，使用 `plan/template_00_postmortem.md` 执行复盘：
-
-- 记录每步耗时、迭代轮次、严重度下降曲线
-- 评估规划流程有效性
-- 收集改进数据，驱动后续模板迭代
-
-> Phase 0 编号为 00，表示对整个 Step 1-5 流程本身的回顾。推荐每个项目完成后执行。
-
----
-
-## 变更请求流程（Change Request）
-
-`spec_final.md` 锁定后发现需要修改时，走 CR 流程而非直接改动。
-完整的 CR 流程定义请参阅 `plan/quick_reference.md` 中的「变更请求流程」章节。
-
-**核心原则：**
-- 绝不修改已锁定的 `spec_final.md`
-- 复制为 `spec_final_v2.md` 后只改必须改的章节
-- 对新版本重新执行 Step 3 压力测试
-- 满足收敛阈值（0 高 + ≤3 中）后锁定新版本
+- **Phase 0 复盘：** 项目完成后使用 `plan/template_00_postmortem.md` 回顾整个 Step 1-5 流程
+- **变更请求（CR）：** `spec_final.md` 锁定后需修改时的流程，详见 `plan/quick_reference.md`
