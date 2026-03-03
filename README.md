@@ -39,7 +39,11 @@ agentic-engineer/
 │   └── stress-test-prompts.md   # 压力测试 Prompt 库
 ├── tools/                       # CLI 工具
 │   ├── scorecard_parser.py      # Scorecard JSON → 漏洞报告
-│   └── test_scorecard_parser.py # 单元测试（63 个）
+│   ├── test_scorecard_parser.py # scorecard 测试（78 个）
+│   ├── check_workflow_consistency.py  # 文档一致性检查器
+│   └── test_check_workflow_consistency.py  # 一致性检查器测试（53 个）
+├── scripts/                     # 自动化脚本
+│   └── pre-push-check.sh       # pre-push hook 入口
 └── conductor/                   # 项目管理
     ├── tracks.md                # 活跃开发轨道
     └── tech-stack.md            # 技术栈约束
