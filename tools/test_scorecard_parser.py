@@ -19,6 +19,7 @@ from tools.scorecard_parser import (
     check_duplicate_warnings,
     extract_version,
     generate_convergence,
+    generate_json_output,
     generate_markdown,
     main,
     parse_scorecard,
@@ -793,6 +794,249 @@ class TestMarkdownInjection(unittest.TestCase):
         table_row = [l for l in lines if "U1" in l][0]
         # Should have escaped pipe, not an extra column
         self.assertIn("a \\| b", table_row)
+
+
+class TestGenerateJsonOutput(unittest.TestCase):
+    """Test generate_json_output contract compliance."""
+
+    def _make_entries(self):
+        return [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            },
+            {
+                "question_id": "W1",
+                "passed": False,
+                "severity": "high",
+                "vulnerability": "问题",
+            },
+        ]
+
+    def test_top_level_keys(self):
+        result = generate_json_output(self._make_entries(), "v1", "2026-03-02", [])
+        self.assertEqual(
+            set(result.keys()),
+            {"version", "date", "entries", "summary", "convergence", "warnings"},
+        )
+
+    def test_version_and_date(self):
+        result = generate_json_output(self._make_entries(), "v3", "2026-01-15", [])
+        self.assertEqual(result["version"], "v3")
+        self.assertEqual(result["date"], "2026-01-15")
+
+    def test_entries_sorted(self):
+        entries = [
+            {
+                "question_id": "W1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "a",
+            },
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "b",
+            },
+        ]
+        result = generate_json_output(entries, "v1", "2026-03-02", [])
+        ids = [e["question_id"] for e in result["entries"]]
+        self.assertEqual(ids, ["U1", "W1"])
+
+    def test_summary_counts(self):
+        result = generate_json_output(self._make_entries(), "v1", "2026-03-02", [])
+        s = result["summary"]
+        self.assertEqual(s["total"], 2)
+        self.assertEqual(s["passed"], 1)
+        self.assertEqual(s["failed"], 1)
+        self.assertEqual(s["by_severity"]["high"], 1)
+        self.assertEqual(s["by_severity"]["none"], 1)
+        self.assertEqual(s["by_severity"]["medium"], 0)
+        self.assertEqual(s["by_severity"]["low"], 0)
+
+    def test_convergence_not_converged(self):
+        result = generate_json_output(self._make_entries(), "v1", "2026-03-02", [])
+        c = result["convergence"]
+        self.assertFalse(c["converged"])
+        self.assertEqual(c["high_count"], 1)
+        self.assertEqual(c["medium_count"], 0)
+        self.assertEqual(c["threshold"], "0 high + <=3 medium")
+
+    def test_convergence_converged(self):
+        entries = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            }
+        ]
+        result = generate_json_output(entries, "v1", "2026-03-02", [])
+        self.assertTrue(result["convergence"]["converged"])
+
+    def test_warnings_passed_through(self):
+        warnings = ["warning 1", "warning 2"]
+        result = generate_json_output(self._make_entries(), "v1", "2026-03-02", warnings)
+        self.assertEqual(result["warnings"], warnings)
+
+    def test_empty_entries(self):
+        result = generate_json_output([], "v1", "2026-03-02", [])
+        self.assertEqual(result["summary"]["total"], 0)
+        self.assertEqual(result["entries"], [])
+        self.assertTrue(result["convergence"]["converged"])
+
+    def test_json_serializable(self):
+        result = generate_json_output(self._make_entries(), "v1", "2026-03-02", [])
+        output = json.dumps(result, ensure_ascii=False)
+        parsed = json.loads(output)
+        self.assertEqual(parsed["version"], "v1")
+
+
+class TestFormatJsonCLI(unittest.TestCase):
+    """Test --format json CLI integration."""
+
+    def test_json_output_is_valid_json(self):
+        data = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            }
+        ]
+        filepath = _write_temp_json(data, "scorecard_v1.json")
+
+        captured_stdout = io.StringIO()
+        with patch("sys.argv", ["scorecard_parser.py", filepath, "--format", "json"]):
+            with patch("sys.stdout", captured_stdout):
+                result = main()
+
+        self.assertEqual(result, ExitCode.SUCCESS)
+        parsed = json.loads(captured_stdout.getvalue())
+        self.assertEqual(parsed["version"], "v1")
+        self.assertIn("entries", parsed)
+        self.assertIn("summary", parsed)
+        self.assertIn("convergence", parsed)
+
+    def test_json_contract_keys(self):
+        data = [
+            {
+                "question_id": "U1",
+                "passed": False,
+                "severity": "high",
+                "vulnerability": "问题",
+            }
+        ]
+        filepath = _write_temp_json(data, "scorecard_v2.json")
+
+        captured_stdout = io.StringIO()
+        with patch("sys.argv", ["scorecard_parser.py", filepath, "--format", "json"]):
+            with patch("sys.stdout", captured_stdout):
+                main()
+
+        parsed = json.loads(captured_stdout.getvalue())
+        self.assertEqual(
+            set(parsed.keys()),
+            {"version", "date", "entries", "summary", "convergence", "warnings"},
+        )
+        self.assertEqual(parsed["summary"]["failed"], 1)
+        self.assertFalse(parsed["convergence"]["converged"])
+
+    def test_default_format_is_markdown(self):
+        data = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            }
+        ]
+        filepath = _write_temp_json(data, "scorecard_v1.json")
+
+        captured_stdout = io.StringIO()
+        with patch("sys.argv", ["scorecard_parser.py", filepath]):
+            with patch("sys.stdout", captured_stdout):
+                main()
+
+        output = captured_stdout.getvalue()
+        self.assertIn("## 压力测试漏洞记录", output)
+
+
+class TestOutputFlag(unittest.TestCase):
+    """Test --output FILE flag."""
+
+    def test_output_writes_file(self):
+        data = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            }
+        ]
+        filepath = _write_temp_json(data, "scorecard_v1.json")
+        tmpdir = tempfile.mkdtemp()
+        _temp_dirs.append(tmpdir)
+        outfile = os.path.join(tmpdir, "report.md")
+
+        captured_stdout = io.StringIO()
+        with patch("sys.argv", ["scorecard_parser.py", filepath, "--output", outfile]):
+            with patch("sys.stdout", captured_stdout):
+                result = main()
+
+        self.assertEqual(result, ExitCode.SUCCESS)
+        self.assertEqual(captured_stdout.getvalue(), "")
+        with open(outfile, encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("## 压力测试漏洞记录", content)
+
+    def test_output_json_to_file(self):
+        data = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            }
+        ]
+        filepath = _write_temp_json(data, "scorecard_v1.json")
+        tmpdir = tempfile.mkdtemp()
+        _temp_dirs.append(tmpdir)
+        outfile = os.path.join(tmpdir, "report.json")
+
+        with patch(
+            "sys.argv",
+            ["scorecard_parser.py", filepath, "--format", "json", "--output", outfile],
+        ):
+            result = main()
+
+        self.assertEqual(result, ExitCode.SUCCESS)
+        with open(outfile, encoding="utf-8") as f:
+            parsed = json.load(f)
+        self.assertEqual(parsed["version"], "v1")
+
+    def test_output_unwritable_path_exits_2(self):
+        data = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            }
+        ]
+        filepath = _write_temp_json(data)
+        bad_path = "/nonexistent_dir/report.md"
+
+        captured_stderr = io.StringIO()
+        with patch("sys.argv", ["scorecard_parser.py", filepath, "--output", bad_path]):
+            with patch("sys.stderr", captured_stderr):
+                result = main()
+
+        self.assertEqual(result, ExitCode.FILE_ERROR)
+        self.assertIn("cannot write to", captured_stderr.getvalue())
 
 
 if __name__ == "__main__":

@@ -1,5 +1,28 @@
 #!/usr/bin/env python3
-"""scorecard_parser: Parse stress test scorecards into Markdown reports."""
+"""scorecard_parser: Parse stress test scorecards into Markdown reports.
+
+JSON output contract (--format json):
+{
+    "version": "v1",               # extracted from filename
+    "date": "2026-03-02",          # ISO 8601
+    "entries": [                    # sorted by prefix order (U→W→D), then numeric
+        {"question_id": "U1", "passed": true, "severity": "none", "vulnerability": "..."}
+    ],
+    "summary": {
+        "total": 10,
+        "passed": 8,
+        "failed": 2,
+        "by_severity": {"high": 0, "medium": 1, "low": 1, "none": 8}
+    },
+    "convergence": {
+        "converged": true,
+        "high_count": 0,
+        "medium_count": 1,
+        "threshold": "0 high + <=3 medium"
+    },
+    "warnings": []                  # consistency/duplicate warnings
+}
+"""
 import argparse
 import datetime
 import json
@@ -218,6 +241,43 @@ def generate_convergence(entries):
     return lines
 
 
+def generate_json_output(entries, version, date_str, warnings):
+    """Generate structured JSON output per the contract in the module docstring."""
+    sorted_entries = sorted(entries, key=sort_key)
+
+    high_count = sum(1 for e in entries if e["severity"] == "high")
+    medium_count = sum(1 for e in entries if e["severity"] == "medium")
+    low_count = sum(1 for e in entries if e["severity"] == "low")
+    none_count = sum(1 for e in entries if e["severity"] == "none")
+    passed_count = sum(1 for e in entries if e["passed"])
+    total = len(entries)
+
+    return {
+        "version": version,
+        "date": date_str,
+        "entries": sorted_entries,
+        "summary": {
+            "total": total,
+            "passed": passed_count,
+            "failed": total - passed_count,
+            "by_severity": {
+                "high": high_count,
+                "medium": medium_count,
+                "low": low_count,
+                "none": none_count,
+            },
+        },
+        "convergence": {
+            "converged": high_count == 0
+            and medium_count <= MEDIUM_CONVERGENCE_THRESHOLD,
+            "high_count": high_count,
+            "medium_count": medium_count,
+            "threshold": "0 high + <=3 medium",
+        },
+        "warnings": warnings,
+    }
+
+
 def create_parser():
     """Create the argparse parser."""
     parser = argparse.ArgumentParser(
@@ -226,6 +286,18 @@ def create_parser():
     parser.add_argument(
         "scorecard",
         help="Path to scorecard JSON file (e.g., spec/scorecard_v1.json)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["markdown", "json"],
+        default="markdown",
+        dest="output_format",
+        help="Output format (default: markdown)",
+    )
+    parser.add_argument(
+        "--output",
+        metavar="FILE",
+        help="Write output to FILE instead of stdout",
     )
     return parser
 
@@ -243,11 +315,24 @@ def main():
     version = extract_version(args.scorecard)
     date_str = datetime.date.today().isoformat()
 
-    md_lines = generate_markdown(entries, version, date_str)
-    conv_lines = generate_convergence(entries)
+    if args.output_format == "json":
+        result = generate_json_output(entries, version, date_str, warnings)
+        output = json.dumps(result, ensure_ascii=False, indent=2)
+    else:
+        md_lines = generate_markdown(entries, version, date_str)
+        conv_lines = generate_convergence(entries)
+        output = "\n".join(md_lines + conv_lines)
 
-    output = "\n".join(md_lines + conv_lines)
-    print(output)
+    if args.output:
+        try:
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(output)
+                f.write("\n")
+        except OSError as e:
+            print(f"Error: cannot write to {args.output}: {e}", file=sys.stderr)
+            return ExitCode.FILE_ERROR
+    else:
+        print(output)
 
     return ExitCode.SUCCESS
 

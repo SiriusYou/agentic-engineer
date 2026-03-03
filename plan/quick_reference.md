@@ -107,6 +107,34 @@ spec_final.md → spec_final_v2.md → spec_final_v3.md
 
 ---
 
+## 工具命令参考
+
+### scorecard_parser
+
+```bash
+# 默认 Markdown 输出
+python3 tools/scorecard_parser.py spec/scorecard_v1.json
+
+# JSON 结构化输出（用于自动化管道）
+python3 tools/scorecard_parser.py spec/scorecard_v1.json --format json
+
+# 写入文件
+python3 tools/scorecard_parser.py spec/scorecard_v1.json --output report.md
+python3 tools/scorecard_parser.py spec/scorecard_v1.json --format json --output report.json
+```
+
+### check_workflow_consistency
+
+```bash
+# 完整报告
+python3 tools/check_workflow_consistency.py
+
+# 摘要模式（适合 CI/hook）
+python3 tools/check_workflow_consistency.py --format summary
+```
+
+---
+
 ## Claude Code 启动命令
 
 ```

@@ -1,5 +1,7 @@
 # Agentic Engineer
 
+[![CI](https://github.com/SiriusYou/AgentLab/actions/workflows/agentic-engineer-test.yml/badge.svg)](https://github.com/SiriusYou/AgentLab/actions/workflows/agentic-engineer-test.yml)
+
 Spec-Driven Development 方法论框架：通过结构化的规划→压测→执行流程，将模糊想法转化为可靠的软件实现。
 
 ---
@@ -80,17 +82,24 @@ cat plan/quick_reference.md
 
 ### scorecard_parser — 压力测试评分解析器
 
-将 Step 3 产出的 JSON scorecard 转换为可读的 Markdown 漏洞报告。
+将 Step 3 产出的 JSON scorecard 转换为可读的漏洞报告。
 
 ```bash
+# Markdown 输出（默认）
 python3 tools/scorecard_parser.py spec/scorecard_v1.json
+
+# JSON 结构化输出
+python3 tools/scorecard_parser.py spec/scorecard_v1.json --format json
+
+# 写入文件
+python3 tools/scorecard_parser.py spec/scorecard_v1.json --format json --output report.json
 ```
 
-输出包括：通过/未通过统计、严重度分布、具体漏洞详情。
+输出包括：通过/未通过统计、严重度分布、收敛判断、具体漏洞详情。
 
 运行测试：
 ```bash
-python3 -m unittest tools.test_scorecard_parser -v
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest tools/ -v
 ```
 
 ---
