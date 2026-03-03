@@ -1,0 +1,19 @@
+[project]
+name = "agentic-engineer"
+version = "0.1.0"
+description = "Spec-Driven Development methodology framework"
+requires-python = ">=3.8"
+
+[tool.pytest.ini_options]
+testpaths = ["tools"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
