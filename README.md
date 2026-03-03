@@ -95,6 +95,36 @@ python3 -m unittest tools.test_scorecard_parser -v
 
 ---
 
+## Pre-push Hook
+
+`scripts/pre-push-check.sh` runs `check_workflow_consistency.py` before every push that touches `agentic-engineer/` files. It's called by the monorepo root pre-push hook.
+
+### Installation
+
+The monorepo root hook (`/Users/youjia/dev/.git/hooks/pre-push`) is a symlink. To verify it's set up:
+
+```bash
+# Check symlink target
+readlink .git/hooks/pre-push
+
+# The target script should contain the agentic-engineer block:
+grep -q "agentic-engineer" "$(readlink .git/hooks/pre-push)" && echo "Hook configured" || echo "Hook needs update"
+```
+
+If the hook doesn't include the agentic-engineer block, the target script needs the following inserted **before** the `.py`-only early exit:
+
+```bash
+# Detect agentic-engineer changes and run consistency check
+HAS_AGENTIC_ENGINEER_CHANGES=$(echo "$CHANGED_ALL_FILES" | grep -c "^agentic-engineer/" || true)
+if [ "$HAS_AGENTIC_ENGINEER_CHANGES" -gt 0 ]; then
+    if ! "$PROJECT_ROOT/agentic-engineer/scripts/pre-push-check.sh"; then
+        exit 1
+    fi
+fi
+```
+
+---
+
 ## 补充流程
 
 - **变更请求（CR）：** `spec_final.md` 锁定后需修改时的流程，详见 `plan/quick_reference.md`
