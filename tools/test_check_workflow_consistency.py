@@ -336,6 +336,33 @@ class TestSpecNamingChecker(TempProjectMixin, unittest.TestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].severity, Severity.WARNING)
 
+    def test_subdirectory_valid_names(self):
+        """Verify SpecNamingChecker recurses into subdirectories."""
+        (self.root / "spec" / "spec-lint").mkdir(parents=True)
+        self.write_file("spec/spec-lint/raw_requirements.md", "")
+        self.write_file("spec/spec-lint/spec_v1.md", "")
+        self.write_file("spec/spec-lint/spec_final.md", "")
+        self.write_file("spec/spec-lint/scorecard_v1.json", "[]")
+        self.write_file("spec/spec-lint/postmortem.md", "")  # no version — should warn
+        checker = SpecNamingChecker()
+        results = checker.run(self.root)
+        sub_results = [r for r in results if "spec-lint" in r.file_path]
+        self.assertEqual(len(sub_results), 5)
+        passes = [r for r in sub_results if r.severity == Severity.PASS]
+        warns = [r for r in sub_results if r.severity == Severity.WARNING]
+        self.assertEqual(len(passes), 4)
+        self.assertEqual(len(warns), 1)
+        self.assertIn("postmortem.md", warns[0].message)
+
+    def test_subdirectory_invalid_name(self):
+        """Verify warning for non-matching file in subdirectory."""
+        (self.root / "spec" / "my-project").mkdir(parents=True)
+        self.write_file("spec/my-project/notes.txt", "random")
+        checker = SpecNamingChecker()
+        results = checker.run(self.root)
+        warns = [r for r in results if r.severity == Severity.WARNING]
+        self.assertTrue(any("notes.txt" in w.message for w in warns))
+
 
 # ============================================================================
 # TrackStatusChecker
@@ -406,6 +433,8 @@ class TestQuestionIdChecker(TempProjectMixin, unittest.TestCase):
 
     def _write_complete_prompts(self):
         lines = []
+        for i in range(1, 6):
+            lines.append(f"**C{i}. CLI Question {i}**")
         for i in range(1, 11):
             lines.append(f"**U{i}. Question {i}**")
         for i in range(1, 6):
@@ -416,6 +445,11 @@ class TestQuestionIdChecker(TempProjectMixin, unittest.TestCase):
         lines.append("\n| 新编号 | 旧编号 | 层级 |")
         lines.append("|-------|--------|------|")
         mapping = [
+            ("C1", "新增"),
+            ("C2", "新增"),
+            ("C3", "新增"),
+            ("C4", "新增"),
+            ("C5", "新增"),
             ("U1", "Q3"),
             ("U2", "Q4"),
             ("U3", "Q5"),
@@ -451,6 +485,8 @@ class TestQuestionIdChecker(TempProjectMixin, unittest.TestCase):
     def test_missing_id(self):
         # Write all except U5
         lines = []
+        for i in range(1, 6):
+            lines.append(f"**C{i}. CLI Question**")
         for i in range(1, 11):
             if i != 5:
                 lines.append(f"**U{i}. Question**")

@@ -614,9 +614,11 @@ class SpecNamingChecker(BaseChecker):
                 )
             ]
 
-        files = [f for f in sorted(spec_dir.iterdir()) if f.is_file()]
-        if not files:
-            return [
+        results = []
+        self._check_directory(spec_dir, root, results)
+
+        if not results:
+            results.append(
                 CheckResult(
                     self.name,
                     Severity.PASS,
@@ -624,33 +626,38 @@ class SpecNamingChecker(BaseChecker):
                     0,
                     "spec/ directory is empty, no files to check",
                 )
-            ]
-
-        results = []
-        for f in files:
-            name = f.name
-            if any(p.match(name) for p in _SPEC_NAME_PATTERNS):
-                results.append(
-                    CheckResult(
-                        self.name,
-                        Severity.PASS,
-                        f"spec/{name}",
-                        0,
-                        f"File name '{name}' matches naming convention",
-                    )
-                )
-            else:
-                results.append(
-                    CheckResult(
-                        self.name,
-                        Severity.WARNING,
-                        f"spec/{name}",
-                        0,
-                        f"File name '{name}' does not match any known spec naming pattern",
-                    )
-                )
+            )
 
         return results
+
+    def _check_directory(self, directory, root, results):
+        """Check files in a directory and recurse into subdirectories."""
+        for entry in sorted(directory.iterdir()):
+            if entry.is_dir():
+                self._check_directory(entry, root, results)
+            elif entry.is_file():
+                name = entry.name
+                rel_path = str(entry.relative_to(root))
+                if any(p.match(name) for p in _SPEC_NAME_PATTERNS):
+                    results.append(
+                        CheckResult(
+                            self.name,
+                            Severity.PASS,
+                            rel_path,
+                            0,
+                            f"File name '{name}' matches naming convention",
+                        )
+                    )
+                else:
+                    results.append(
+                        CheckResult(
+                            self.name,
+                            Severity.WARNING,
+                            rel_path,
+                            0,
+                            f"File name '{name}' does not match any known spec naming pattern",
+                        )
+                    )
 
 
 # ---------------------------------------------------------------------------
@@ -849,7 +856,8 @@ class TrackStatusChecker(BaseChecker):
 _QUESTION_ID_RE = re.compile(r"\*\*([A-Z]\d+)\.\s")
 
 EXPECTED_IDS = (
-    [f"U{i}" for i in range(1, 11)]
+    [f"C{i}" for i in range(1, 6)]
+    + [f"U{i}" for i in range(1, 11)]
     + [f"W{i}" for i in range(1, 6)]
     + [f"D{i}" for i in range(1, 6)]
 )

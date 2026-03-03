@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pre-push check for agentic-engineer
-# Called by the monorepo root pre-push hook when agentic-engineer/ files change.
+# Called by .git/hooks/pre-push in the standalone agentic-engineer repository.
 # Exit 1 on any failure to block the push.
 
 set -e

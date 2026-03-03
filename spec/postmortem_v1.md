@@ -108,10 +108,21 @@
 | 1 | 为 Template 03 增加 CLI 工具专用压测题子集（5 题） | Start #1 | P1 | □ 待办 |
 | 2 | SDD 模板增加 CLI 变体（章节 4 命令行接口格式） | 反馈 #2 | P1 | □ 待办 |
 | 3 | ConvergenceChecker 等检查器的正则模式加入 SDD 模板作为必填项 | Stop #1 | P2 | □ 待办 |
-| 4 | scorecard_parser 增加 --output 和 --format json | 反馈 #5 | P1 (原 L1) | □ 待办 |
-| 5 | check_workflow_consistency 集成到 pre-push hook | 反馈 #5 | P1 | □ 待办 |
-| 6 | CI 最小闭环（GitHub Actions 运行两个工具的测试） | 原计划 #14 | P1 | □ 待办 |
+| 4 | scorecard_parser 增加 --output 和 --format json | 反馈 #5 | P1 (原 L1) | ✅ TRACK-002 完成 |
+| 5 | check_workflow_consistency 集成到 pre-push hook | 反馈 #5 | P1 | ✅ TRACK-002 完成 |
+| 6 | CI 最小闭环（GitHub Actions 运行两个工具的测试） | 原计划 #14 | P1 | ✅ TRACK-002 完成 |
 | 7 | tech-stack.md 增加决策标准（何时选 Python vs TS） | 原计划 M6 | P2 | □ 待办 |
+
+### 演进记录
+
+| 指标 | TRACK-001 完成时 | TRACK-002 完成后 |
+|------|-----------------|-----------------|
+| 测试数量 | 108 | 131 |
+| 一致性检查项 | 54 | 55 |
+| CI 状态 | 无 | Python 3.8 + 3.12 绿色 |
+| pre-push hook | 无 | `scripts/pre-push-check.sh` |
+| scorecard 输出 | stdout only | `--format json --output` |
+| 仓库结构 | AgentLab monorepo 子目录 | 独立仓库 `SiriusYou/agentic-engineer` |
 
 ---
 

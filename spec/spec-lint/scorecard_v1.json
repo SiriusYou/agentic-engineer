@@ -1,0 +1,32 @@
+[
+  {
+    "question_id": "C1",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — SDD 明确定义了空文件、编码错误的处理策略（章节 6 错误处理表）"
+  },
+  {
+    "question_id": "C2",
+    "passed": false,
+    "severity": "medium",
+    "vulnerability": "TBDMarkerChecker 的正则 (?i)\\b(TBD|TODO|待定|待补充|未决定)\\b 在中文语境下 \\b 不可靠 — '待定方案' 中的 '待定' 可能因中文无词界而漏报"
+  },
+  {
+    "question_id": "C3",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — 空文件场景在错误处理表中定义为 WARNING，不会误报为通过"
+  },
+  {
+    "question_id": "C4",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — spec-lint 接受单个文件路径，不涉及目录遍历或 --root 歧义"
+  },
+  {
+    "question_id": "C5",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — Exit code 语义表完整定义了 0/1/2 三档，stdout/stderr 分离契约明确"
+  }
+]
