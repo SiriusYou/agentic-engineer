@@ -1,6 +1,6 @@
 # Agentic Engineer
 
-[![CI](https://github.com/SiriusYou/AgentLab/actions/workflows/agentic-engineer-test.yml/badge.svg)](https://github.com/SiriusYou/AgentLab/actions/workflows/agentic-engineer-test.yml)
+[![CI](https://github.com/SiriusYou/agentic-engineer/actions/workflows/test.yml/badge.svg)](https://github.com/SiriusYou/agentic-engineer/actions/workflows/test.yml)
 
 Spec-Driven Development 方法论框架：通过结构化的规划→压测→执行流程，将模糊想法转化为可靠的软件实现。
 
@@ -106,30 +106,24 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest tools/ -v
 
 ## Pre-push Hook
 
-`scripts/pre-push-check.sh` runs `check_workflow_consistency.py` before every push that touches `agentic-engineer/` files. It's called by the monorepo root pre-push hook.
+`scripts/pre-push-check.sh` runs `check_workflow_consistency.py` before every push.
 
 ### Installation
 
-The monorepo root hook (`/Users/youjia/dev/.git/hooks/pre-push`) is a symlink. To verify it's set up:
-
 ```bash
-# Check symlink target
-readlink .git/hooks/pre-push
+# Option 1: Symlink (recommended)
+ln -sf ../../scripts/pre-push-check.sh .git/hooks/pre-push
 
-# The target script should contain the agentic-engineer block:
-grep -q "agentic-engineer" "$(readlink .git/hooks/pre-push)" && echo "Hook configured" || echo "Hook needs update"
+# Option 2: Direct call in existing hook
+# Add this line to your .git/hooks/pre-push:
+./scripts/pre-push-check.sh || exit 1
 ```
 
-If the hook doesn't include the agentic-engineer block, the target script needs the following inserted **before** the `.py`-only early exit:
+### Verify
 
 ```bash
-# Detect agentic-engineer changes and run consistency check
-HAS_AGENTIC_ENGINEER_CHANGES=$(echo "$CHANGED_ALL_FILES" | grep -c "^agentic-engineer/" || true)
-if [ "$HAS_AGENTIC_ENGINEER_CHANGES" -gt 0 ]; then
-    if ! "$PROJECT_ROOT/agentic-engineer/scripts/pre-push-check.sh"; then
-        exit 1
-    fi
-fi
+bash scripts/pre-push-check.sh
+# Should output: N passed, 0 failed, 0 warnings
 ```
 
 ---
