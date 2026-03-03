@@ -614,11 +614,10 @@ class SpecNamingChecker(BaseChecker):
                 )
             ]
 
-        results = []
-        self._check_directory(spec_dir, root, results)
+        results = self._check_directory(spec_dir, root)
 
         if not results:
-            results.append(
+            return [
                 CheckResult(
                     self.name,
                     Severity.PASS,
@@ -626,38 +625,30 @@ class SpecNamingChecker(BaseChecker):
                     0,
                     "spec/ directory is empty, no files to check",
                 )
-            )
+            ]
 
         return results
 
-    def _check_directory(self, directory, root, results):
+    def _check_directory(self, directory, root):
         """Check files in a directory and recurse into subdirectories."""
+        results = []
         for entry in sorted(directory.iterdir()):
             if entry.is_dir():
-                self._check_directory(entry, root, results)
+                results.extend(self._check_directory(entry, root))
             elif entry.is_file():
                 name = entry.name
                 rel_path = str(entry.relative_to(root))
-                if any(p.match(name) for p in _SPEC_NAME_PATTERNS):
-                    results.append(
-                        CheckResult(
-                            self.name,
-                            Severity.PASS,
-                            rel_path,
-                            0,
-                            f"File name '{name}' matches naming convention",
-                        )
-                    )
-                else:
-                    results.append(
-                        CheckResult(
-                            self.name,
-                            Severity.WARNING,
-                            rel_path,
-                            0,
-                            f"File name '{name}' does not match any known spec naming pattern",
-                        )
-                    )
+                is_valid = any(p.match(name) for p in _SPEC_NAME_PATTERNS)
+                severity = Severity.PASS if is_valid else Severity.WARNING
+                message = (
+                    f"File name '{name}' matches naming convention"
+                    if is_valid
+                    else f"File name '{name}' does not match any known spec naming pattern"
+                )
+                results.append(
+                    CheckResult(self.name, severity, rel_path, 0, message)
+                )
+        return results
 
 
 # ---------------------------------------------------------------------------
