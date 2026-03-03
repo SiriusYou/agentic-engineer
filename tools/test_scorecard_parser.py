@@ -879,7 +879,9 @@ class TestGenerateJsonOutput(unittest.TestCase):
 
     def test_warnings_passed_through(self):
         warnings = ["warning 1", "warning 2"]
-        result = generate_json_output(self._make_entries(), "v1", "2026-03-02", warnings)
+        result = generate_json_output(
+            self._make_entries(), "v1", "2026-03-02", warnings
+        )
         self.assertEqual(result["warnings"], warnings)
 
     def test_empty_entries(self):
