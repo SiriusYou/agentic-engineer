@@ -11,7 +11,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 echo ""
 echo "─── agentic-engineer: consistency check ───"
 
-if ! python3 "$PROJECT_DIR/tools/check_workflow_consistency.py" --format summary; then
+if ! python3 "$PROJECT_DIR/tools/check_workflow_consistency.py" --root "$PROJECT_DIR" --format summary; then
     echo ""
     echo "✗ agentic-engineer consistency check FAILED — fix before pushing"
     exit 1
