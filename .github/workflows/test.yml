@@ -31,3 +31,9 @@ jobs:
 
       - name: Run consistency checks
         run: python tools/check_workflow_consistency.py
+
+      - name: spec-lint dogfood
+        run: |
+          python tools/spec_lint.py spec/spec_final.md
+          python tools/spec_lint.py spec/spec-lint/spec_final.md
+          python tools/spec_lint.py --format json spec/spec-lint/spec_final.md | python -c 'import json,sys;json.load(sys.stdin)'

@@ -5,6 +5,7 @@
 | completed | TRACK-001 | 首次真实项目闭环验证 | 2026-03-02 | 2026-03-02 |
 | completed | TRACK-002 | 工程护栏 + 工具链增强 | 2026-03-02 | 2026-03-03 |
 | completed | TRACK-003 | 方法论迭代 + 二次闭环 | 2026-03-03 | 2026-03-04 |
+| completed | TRACK-004 | spec-lint 工程化收口 | 2026-03-04 | 2026-03-04 |
 
 <!-- Tracks registered by /conductor:new-track -->
 
@@ -68,3 +69,25 @@
 - Postmortem 含量化对比（收敛轮次、有效题比例 vs TRACK-001）
 
 **状态：** completed — spec-lint 工具实现完成，方法论二次闭环验证通过
+
+---
+
+## TRACK-004: spec-lint 工程化收口
+
+**目标：** 将 spec-lint 从"已实现"升级为"CI 门控 + 团队可复用"状态。
+
+**交付物：**
+- Pre-push hook 增加 spec-lint 烟雾测试（两个 spec 文件）
+- CI 独立 dogfood 步骤（含 JSON 输出验证）
+- README 文档化 spec-lint 用法和排障指南
+- SDD 模板 §8 标准化"已知误报/漏报边界"要求
+- Postmortem 行动项 #2 闭合
+
+**验收标准：**
+- pre-push hook 通过（含 spec-lint 烟雾测试）
+- CI 有独立 dogfood job（与 pytest 分离）
+- README 包含 spec-lint 文档
+- postmortem_v1.md 行动项 #2 标记 ✅
+- 工作树干净，所有测试绿色
+
+**状态：** completed — pre-push + CI dogfood + README + SDD 模板标准化 + postmortem 闭合

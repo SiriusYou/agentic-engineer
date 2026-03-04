@@ -101,16 +101,44 @@ python3 tools/scorecard_parser.py spec/scorecard_v1.json --format json --output 
 
 输出包括：通过/未通过统计、严重度分布、收敛判断、具体漏洞详情。
 
+### spec_lint — SDD 规范检查器
+
+验证 SDD 文档结构完整性，包括：章节存在性、TBD 标记检测、Markdown 格式、模式定义约束等。
+
+```bash
+# 检查单个 spec 文件
+python3 tools/spec_lint.py spec/spec_final.md
+
+# JSON 结构化输出
+python3 tools/spec_lint.py spec/spec_final.md --format json
+
+# 仅运行指定检查器
+python3 tools/spec_lint.py spec/spec_final.md --check section_presence,tbd_marker
+```
+
+常见问题排查：
+- **TBD 误报**：行内代码中的 `TBD` 不会触发告警（已排除 backtick 包裹的内容）
+- **章节缺失**：确认使用 `## N. 标题` 格式，编号与标题之间需有 `. `
+- **模式定义缺失**：如果工具不含正则/模式匹配，该检查项可忽略（info 级别）
+
+### check_workflow_consistency — 文档一致性检查器
+
+验证 conductor/tracks.md、README 和其他文档之间的交叉引用一致性。
+
+```bash
+python3 tools/check_workflow_consistency.py --root . --format summary
+```
+
 运行测试：
 ```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest tools/ -v
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest tools/ -v
 ```
 
 ---
 
 ## Pre-push Hook
 
-`scripts/pre-push-check.sh` runs `check_workflow_consistency.py` before every push.
+`scripts/pre-push-check.sh` runs consistency checks and spec-lint smoke tests before every push.
 
 ### Installation
 

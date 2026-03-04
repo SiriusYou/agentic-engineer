@@ -18,3 +18,20 @@ if ! python3 "$PROJECT_DIR/tools/check_workflow_consistency.py" --root "$PROJECT
 fi
 
 echo "✓ agentic-engineer consistency check passed"
+
+echo ""
+echo "─── agentic-engineer: spec-lint smoke ───"
+
+if ! python3 "$PROJECT_DIR/tools/spec_lint.py" "$PROJECT_DIR/spec/spec_final.md"; then
+    echo ""
+    echo "✗ spec-lint smoke FAILED on spec/spec_final.md — fix before pushing"
+    exit 1
+fi
+
+if ! python3 "$PROJECT_DIR/tools/spec_lint.py" "$PROJECT_DIR/spec/spec-lint/spec_final.md"; then
+    echo ""
+    echo "✗ spec-lint smoke FAILED on spec/spec-lint/spec_final.md — fix before pushing"
+    exit 1
+fi
+
+echo "✓ agentic-engineer spec-lint smoke passed"
