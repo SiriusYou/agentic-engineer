@@ -4,7 +4,7 @@
 | ------ | -------- | ----- | ------- | ------- |
 | completed | TRACK-001 | 首次真实项目闭环验证 | 2026-03-02 | 2026-03-02 |
 | completed | TRACK-002 | 工程护栏 + 工具链增强 | 2026-03-02 | 2026-03-03 |
-| active | TRACK-003 | 方法论迭代 + 二次闭环 | 2026-03-03 | 2026-03-03 |
+| completed | TRACK-003 | 方法论迭代 + 二次闭环 | 2026-03-03 | 2026-03-04 |
 
 <!-- Tracks registered by /conductor:new-track -->
 
@@ -67,4 +67,4 @@
 - 完整产物链落盘 `spec/spec-lint/`
 - Postmortem 含量化对比（收敛轮次、有效题比例 vs TRACK-001）
 
-**状态：** active — 方法论迭代 + 二次闭环验证进行中
+**状态：** completed — spec-lint 工具实现完成，方法论二次闭环验证通过

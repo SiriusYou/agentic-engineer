@@ -105,13 +105,13 @@
 
 | 编号 | 行动项 | 来源 | 优先级 | 状态 |
 |------|--------|------|--------|------|
-| 1 | 为 Template 03 增加 CLI 工具专用压测题子集（5 题） | Start #1 | P1 | □ 待办 |
-| 2 | SDD 模板增加 CLI 变体（章节 4 命令行接口格式） | 反馈 #2 | P1 | □ 待办 |
-| 3 | ConvergenceChecker 等检查器的正则模式加入 SDD 模板作为必填项 | Stop #1 | P2 | □ 待办 |
+| 1 | 为 Template 03 增加 CLI 工具专用压测题子集（5 题） | Start #1 | P1 | ✅ TRACK-003 完成 |
+| 2 | SDD 模板增加 CLI 变体（章节 4 命令行接口格式） | 反馈 #2 | P1 | ✅ TRACK-003 完成 |
+| 3 | ConvergenceChecker 等检查器的正则模式加入 SDD 模板作为必填项 | Stop #1 | P2 | ✅ TRACK-003 完成 |
 | 4 | scorecard_parser 增加 --output 和 --format json | 反馈 #5 | P1 (原 L1) | ✅ TRACK-002 完成 |
 | 5 | check_workflow_consistency 集成到 pre-push hook | 反馈 #5 | P1 | ✅ TRACK-002 完成 |
 | 6 | CI 最小闭环（GitHub Actions 运行两个工具的测试） | 原计划 #14 | P1 | ✅ TRACK-002 完成 |
-| 7 | tech-stack.md 增加决策标准（何时选 Python vs TS） | 原计划 M6 | P2 | □ 待办 |
+| 7 | tech-stack.md 增加决策标准（何时选 Python vs TS） | 原计划 M6 | P2 | ✅ TRACK-003 完成 |
 
 ### 演进记录
 

@@ -107,9 +107,9 @@
 
 | 编号 | 行动项 | 来源 | 优先级 | 状态 |
 |------|--------|------|--------|------|
-| 1 | 为 TBDMarkerChecker 实现分离式中英文匹配正则 | C2 漏洞 | P1 | □ 待实现（spec 已修复） |
+| 1 | 为 TBDMarkerChecker 实现分离式中英文匹配正则 | C2 漏洞 | P1 | ✅ spec_lint.py 已实现 |
 | 2 | 将"已知误报/漏报边界"段标准化到 SDD 模板章节 8 | Start #1 | P2 | □ 待办 |
-| 3 | 实现 spec-lint 工具（按 spec_final.md 开发） | TRACK-003 Phase B | P1 | □ 待实现 |
+| 3 | 实现 spec-lint 工具（按 spec_final.md 开发） | TRACK-003 Phase B | P1 | ✅ tools/spec_lint.py 完成（52 测试通过） |
 
 ---
 
