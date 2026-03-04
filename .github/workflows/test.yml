@@ -34,6 +34,7 @@ jobs:
 
       - name: spec-lint dogfood
         run: |
+          set -euo pipefail
           python tools/spec_lint.py spec/spec_final.md
           python tools/spec_lint.py spec/spec-lint/spec_final.md
           python tools/spec_lint.py --format json spec/spec-lint/spec_final.md | python -c 'import json,sys;json.load(sys.stdin)'
