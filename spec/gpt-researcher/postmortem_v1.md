@@ -27,7 +27,7 @@
 | 首轮高严重度问题数 | 1 |
 | 首轮中严重度问题数 | 4 |
 | 最终轮高严重度问题数 | 0 |
-| 最终轮中严重度问题数 | 0（4 个均在 spec_final 中修复） |
+| 最终轮中严重度问题数 | 1（U3/U9/W4 修复，U1 accepted） |
 | 变更请求次数（CR） | 0 |
 | 执行中歧义暂停次数 | 0 |
 | scorecard_parser 收敛阈值 | 0 high + ≤3 medium |
@@ -36,7 +36,7 @@
 | 轮次 | 高严重度 | 中严重度 | 低严重度 |
 |------|---------|---------|---------|
 | Round 1 | 1 | 4 | 3 |
-| spec_final (post-fix) | 0 | 0 (all addressed) | 3 (accepted) |
+| spec_final (post-fix) | 0 | 1 (U1 accepted) | 3 (accepted) |
 
 ---
 
