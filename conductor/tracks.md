@@ -8,6 +8,7 @@
 | completed | TRACK-004 | spec-lint 工程化收口 | 2026-03-04 | 2026-03-04 |
 | completed | TRACK-005 | 泛化验证 — 全栈项目闭环 (gpt-researcher) | 2026-03-04 | 2026-03-05 |
 | completed | TRACK-006 | 模板迭代 — TRACK-005 postmortem 行动项落实 | 2026-03-05 | 2026-03-05 |
+| pending | TRACK-007 | 外部项目 Step 5 编码验证 (gpt-researcher) | 2026-03-05 | 2026-03-05 |
 
 <!-- Tracks registered by /conductor:new-track -->
 
@@ -149,3 +150,53 @@
 - postmortem 行动项全部勾选
 
 **状态：** completed — 5 个行动项全部落实，192 tests + 76 consistency checks 全绿
+
+---
+
+## TRACK-007: 外部项目 Step 5 编码验证 (gpt-researcher)
+
+**目标：** 在外部仓按 `spec/gpt-researcher/spec_final.md` 完成真实实现，验证 spec→code 转化质量。
+
+**背景：** 规划链路（Step 1-4）已在 TRACK-001/003/005 中充分验证，但 Step 5 编码阶段此前仅在本仓内执行（check_workflow_consistency、spec_lint）。在外部项目上的 spec→code 转化效果是方法论核心价值的最大未验证缺口。
+
+**Pilot 项目：** gpt-researcher (`~/dev/gpt-researcher`) — 复用 TRACK-005 产出的 spec_final.md
+
+**范围：**
+- 实现 spec 定义的 Alignment Scoring + Auto-Retry（后端逻辑 + 测试）
+- 不做前端 UI（MVP scope）
+- 不在 TRACK-007 引入新自动化工具
+
+**交付物：**
+1. 外部仓代码提交与测试结果
+2. `spec/gpt-researcher/behavior_inventory.md` — 冻结的行为清单（偏差率分母）
+3. postmortem_v2.md（执行阶段复盘，含量化指标，落盘 spec/gpt-researcher/）
+4. `conductor/tracks.md` 闭合 TRACK-007
+
+**验收标准：**
+1. 外部仓目标功能可运行并通过测试
+2. 所有 spec 偏差有显式记录（偏差原因 + 处理方式）
+3. 量化数据：编码耗时、歧义暂停次数、spec 偏差率（附偏差数，基于 behavior inventory）
+4. agentic-engineer 现有门禁保持全绿
+5. 可审计证据：外部仓 commit hash、测试命令及结果快照记录在 postmortem 中
+
+**失败信号（两级，基于 TRACK-005 数据设计）：**
+
+- 编码耗时 / SDD 耗时 — Warning: > 5x (~5h), Fail: > 8x (~8h)
+- 歧义暂停次数 — Warning: > 3 次, Fail: > 5 次
+- spec 偏差率 — Warning: > 20%, Fail: > 30%
+
+SDD 耗时基准 ~60min，编码预估 4-8h，warning 线在预估中位，fail 线在预估上限。
+
+**测量协议：**
+- **编码耗时**：从开始读 spec_final 到功能通过测试的壁钟时间，不含环境搭建
+- **歧义暂停**：编码中因 spec 不清/矛盾/缺失而停下做设计决策的次数。每次记录触发位置（spec 章节号）、歧义描述、决策结果
+- **spec 偏差**：最终实现与 spec 不一致的接口/行为数 / behavior inventory 总数。每次偏差记录偏差内容、原因分类（spec 过时 / spec 不可行 / 发现更优方案）
+- **behavior inventory**：冻结清单见 `spec/gpt-researcher/behavior_inventory.md`
+
+**假设：**
+- 继续以 gpt-researcher 为验证对象
+- 保持当前 pre-push 不引入 pytest（CI 保障）
+- 成功判定以"外部项目可运行 + 指标闭环 + postmortem 可复现"为准
+- 若触发选项 D（紧急新项目），仍需在本仓 `spec/[项目名]/postmortem_vN.md` 记录执行证据
+
+**状态：** pending — behavior_inventory 已冻结，待启动编码验证

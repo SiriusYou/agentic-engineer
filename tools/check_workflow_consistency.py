@@ -594,6 +594,7 @@ _SPEC_NAME_PATTERNS = [
     re.compile(r"^stress_test_final_v\d+\.md$"),
     re.compile(r"^postmortem_v\d+\.md$"),
     re.compile(r"^README\.md$"),
+    re.compile(r"^behavior_inventory\.md$"),
 ]
 
 
