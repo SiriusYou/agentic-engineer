@@ -8,7 +8,7 @@
 | completed | TRACK-004 | spec-lint 工程化收口 | 2026-03-04 | 2026-03-04 |
 | completed | TRACK-005 | 泛化验证 — 全栈项目闭环 (gpt-researcher) | 2026-03-04 | 2026-03-05 |
 | completed | TRACK-006 | 模板迭代 — TRACK-005 postmortem 行动项落实 | 2026-03-05 | 2026-03-05 |
-| pending | TRACK-007 | 外部项目 Step 5 编码验证 (gpt-researcher) | 2026-03-05 | 2026-03-05 |
+| completed | TRACK-007 | 外部项目 Step 5 编码验证 (gpt-researcher) | 2026-03-05 | 2026-03-05 |
 
 <!-- Tracks registered by /conductor:new-track -->
 
@@ -199,4 +199,4 @@ SDD 耗时基准 ~60min，编码预估 4-8h，warning 线在预估中位，fail 
 - 成功判定以"外部项目可运行 + 指标闭环 + postmortem 可复现"为准
 - 若触发选项 D（紧急新项目），仍需在本仓 `spec/[项目名]/postmortem_vN.md` 记录执行证据
 
-**状态：** pending — behavior_inventory 已冻结，待启动编码验证
+**状态：** completed — 39/39 behavior items 实现，28 tests passing，spec 偏差率 5.1%，编码耗时 0.75x SDD
