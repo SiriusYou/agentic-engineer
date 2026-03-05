@@ -8,9 +8,11 @@
 ## 使用步骤
 
 1. **新建** Gemini 对话
-2. 从 `conductor/tech-stack.md` 和 `conductor/product-guidelines.md` 提取约束，填入 Prompt 中的约束段
+2. 确定技术栈约束来源（见下方说明）
 3. 粘贴以下 Prompt，将 `[需求文本]` 替换为 `raw_requirements.md` 的全文
 4. 输出结果保存为 `spec_v1.md`
+
+> **技术栈约束来源：** 如果是为**已有项目**新增功能，技术栈约束应从目标项目代码库继承，而非从 `conductor/tech-stack.md` 读取。Prompt 中的技术栈段改为：`从 [项目名] 现有代码库继承: [实际栈]`
 
 ---
 
@@ -21,11 +23,12 @@
 要求：每个章节足够详细，可以直接交给开发工程师实现，无需进一步沟通。
 
 技术栈约束（在以下允许范围中选择，不可使用范围外的技术）：
-- 主要语言: [从 conductor/tech-stack.md 提取，例如: TypeScript, Python]（从中选择适合本项目的）
-- 前端框架: [从 conductor/tech-stack.md 提取，例如: React, Vue, Next.js]（从中选择适合本项目的）
-- 后端框架: [从 conductor/tech-stack.md 提取，例如: Django / FastAPI]（从中选择适合本项目的）
-- 数据库: [从 conductor/tech-stack.md 提取，例如: PostgreSQL, SQLite]（从中选择适合本项目的）
-- 基础设施: [从 conductor/tech-stack.md 提取，如未确定写"待项目确定"]
+[新项目：从 conductor/tech-stack.md 提取；已有项目：从目标项目代码库继承]
+- 主要语言: [例如: TypeScript, Python]（从中选择适合本项目的）
+- 前端框架: [例如: React, Vue, Next.js]（从中选择适合本项目的）
+- 后端框架: [例如: Django / FastAPI]（从中选择适合本项目的）
+- 数据库: [例如: PostgreSQL, SQLite]（从中选择适合本项目的）
+- 基础设施: [如未确定写"待项目确定"]
 
 设计原则约束（必须体现在架构决策中）：
 - 风格基调: [从 conductor/product-guidelines.md 提取，例如: Professional and technical]
@@ -41,7 +44,9 @@
 请按以下结构输出 SDD：
 
 # [项目名] — 软件设计文档
-版本: v1.0 | 状态: Draft
+版本: v1.0
+状态: Draft
+最后更新: [YYYY-MM-DD]
 
 ## 1. 项目概述
 ### 1.1 目标（一句话）
@@ -80,8 +85,10 @@
 - [ ] 章节 1-6 全部存在
 - [ ] 所有接口都有请求/响应格式
 - [ ] 技术栈表格已填写
-- [ ] 技术栈与 Conductor 约束一致（未擅自替换语言/框架/数据库）
+- [ ] 技术栈与所选约束来源一致（未擅自替换语言/框架/数据库）
 - [ ] 没有出现"TBD"、"待定"、"后续确认"字样
+
+> **提示：** 写 SDD 前请先阅读 `skills/sdd-template.md` 末尾的 **spec_lint 格式速查**，避免 final 阶段返工格式。
 
 如果有缺失，在**同一个对话**中追问：
 ```

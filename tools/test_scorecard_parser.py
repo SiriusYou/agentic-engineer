@@ -137,6 +137,27 @@ class TestValidateEntry(unittest.TestCase):
         self.assertIn("medium", errors[0])
         self.assertIn("none", errors[0])
 
+    def test_na_severity_valid(self):
+        entry = {
+            "question_id": "D1",
+            "passed": True,
+            "severity": "n/a",
+            "vulnerability": "MVP无持久化，不适用",
+        }
+        errors = validate_entry(entry, 0)
+        self.assertEqual(errors, [])
+
+    def test_na_severity_passed_false_rejected(self):
+        entry = {
+            "question_id": "D1",
+            "passed": False,
+            "severity": "n/a",
+            "vulnerability": "test",
+        }
+        errors = validate_entry(entry, 0)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("n/a requires passed=true", errors[0])
+
     def test_non_dict_entry(self):
         errors = validate_entry("not a dict", 3)
         self.assertEqual(len(errors), 1)
@@ -852,10 +873,12 @@ class TestGenerateJsonOutput(unittest.TestCase):
         self.assertEqual(s["total"], 2)
         self.assertEqual(s["passed"], 1)
         self.assertEqual(s["failed"], 1)
+        self.assertEqual(s["not_applicable"], 0)
         self.assertEqual(s["by_severity"]["high"], 1)
         self.assertEqual(s["by_severity"]["none"], 1)
         self.assertEqual(s["by_severity"]["medium"], 0)
         self.assertEqual(s["by_severity"]["low"], 0)
+        self.assertEqual(s["by_severity"]["n/a"], 0)
 
     def test_convergence_not_converged(self):
         result = generate_json_output(self._make_entries(), "v1", "2026-03-02", [])
@@ -887,8 +910,54 @@ class TestGenerateJsonOutput(unittest.TestCase):
     def test_empty_entries(self):
         result = generate_json_output([], "v1", "2026-03-02", [])
         self.assertEqual(result["summary"]["total"], 0)
+        self.assertEqual(result["summary"]["not_applicable"], 0)
+        self.assertEqual(result["summary"]["by_severity"]["n/a"], 0)
         self.assertEqual(result["entries"], [])
         self.assertTrue(result["convergence"]["converged"])
+
+    def test_na_entries_counted(self):
+        entries = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            },
+            {
+                "question_id": "D1",
+                "passed": True,
+                "severity": "n/a",
+                "vulnerability": "MVP无持久化",
+            },
+        ]
+        result = generate_json_output(entries, "v1", "2026-03-02", [])
+        self.assertEqual(result["summary"]["total"], 2)
+        self.assertEqual(result["summary"]["passed"], 2)
+        self.assertEqual(result["summary"]["failed"], 0)
+        self.assertEqual(result["summary"]["not_applicable"], 1)
+        self.assertEqual(result["summary"]["by_severity"]["n/a"], 1)
+        self.assertTrue(result["convergence"]["converged"])
+
+    def test_na_does_not_affect_convergence(self):
+        entries = [
+            {
+                "question_id": "D1",
+                "passed": True,
+                "severity": "n/a",
+                "vulnerability": "不适用",
+            },
+            {
+                "question_id": "D2",
+                "passed": True,
+                "severity": "n/a",
+                "vulnerability": "不适用",
+            },
+        ]
+        result = generate_json_output(entries, "v1", "2026-03-02", [])
+        c = result["convergence"]
+        self.assertTrue(c["converged"])
+        self.assertEqual(c["high_count"], 0)
+        self.assertEqual(c["medium_count"], 0)
 
     def test_json_serializable(self):
         result = generate_json_output(self._make_entries(), "v1", "2026-03-02", [])
@@ -965,6 +1034,77 @@ class TestFormatJsonCLI(unittest.TestCase):
 
         output = captured_stdout.getvalue()
         self.assertIn("## 压力测试漏洞记录", output)
+
+
+class TestNaSeverityCLI(unittest.TestCase):
+    """Test n/a severity end-to-end via CLI."""
+
+    def test_na_json_output(self):
+        data = [
+            {
+                "question_id": "U1",
+                "passed": True,
+                "severity": "none",
+                "vulnerability": "无",
+            },
+            {
+                "question_id": "D1",
+                "passed": True,
+                "severity": "n/a",
+                "vulnerability": "MVP无持久化，不适用",
+            },
+        ]
+        filepath = _write_temp_json(data, "scorecard_v1.json")
+
+        captured_stdout = io.StringIO()
+        with patch("sys.argv", ["scorecard_parser.py", filepath, "--format", "json"]):
+            with patch("sys.stdout", captured_stdout):
+                result = main()
+
+        self.assertEqual(result, ExitCode.SUCCESS)
+        parsed = json.loads(captured_stdout.getvalue())
+        self.assertEqual(parsed["summary"]["not_applicable"], 1)
+        self.assertEqual(parsed["summary"]["by_severity"]["n/a"], 1)
+        self.assertEqual(parsed["summary"]["passed"], 2)
+        self.assertEqual(parsed["summary"]["failed"], 0)
+        self.assertTrue(parsed["convergence"]["converged"])
+
+    def test_na_passed_false_exits_1(self):
+        data = [
+            {
+                "question_id": "D1",
+                "passed": False,
+                "severity": "n/a",
+                "vulnerability": "test",
+            },
+        ]
+        filepath = _write_temp_json(data)
+        with patch("sys.argv", ["scorecard_parser.py", filepath]):
+            with self.assertRaises(SystemExit) as cm:
+                main()
+            self.assertEqual(cm.exception.code, ExitCode.VALIDATION_ERROR)
+
+    def test_na_markdown_output(self):
+        data = [
+            {
+                "question_id": "D1",
+                "passed": True,
+                "severity": "n/a",
+                "vulnerability": "MVP无持久化，不适用",
+            },
+        ]
+        filepath = _write_temp_json(data, "scorecard_v1.json")
+
+        captured_stdout = io.StringIO()
+        with patch("sys.argv", ["scorecard_parser.py", filepath]):
+            with patch("sys.stdout", captured_stdout):
+                result = main()
+
+        self.assertEqual(result, ExitCode.SUCCESS)
+        output = captured_stdout.getvalue()
+        self.assertIn("D1", output)
+        self.assertIn("n/a", output)
+        self.assertIn("✅", output)
 
 
 class TestOutputFlag(unittest.TestCase):

@@ -12,7 +12,8 @@ JSON output contract (--format json):
         "total": 10,
         "passed": 8,
         "failed": 2,
-        "by_severity": {"high": 0, "medium": 1, "low": 1, "none": 8}
+        "not_applicable": 0,       # count of severity=="n/a" entries
+        "by_severity": {"high": 0, "medium": 1, "low": 1, "none": 8, "n/a": 0}
     },
     "convergence": {
         "converged": true,
@@ -22,6 +23,13 @@ JSON output contract (--format json):
     },
     "warnings": []                  # consistency/duplicate warnings
 }
+
+Severity "n/a" semantics:
+- Represents questions not applicable to the project (e.g., data layer for stateless MVP)
+- n/a entries MUST have passed=true (they are not failures, just inapplicable)
+- n/a entries count toward summary.passed (via passed=true)
+- n/a does NOT affect convergence (only high + medium participate)
+- summary.not_applicable is informational only
 """
 import argparse
 import datetime
@@ -37,7 +45,7 @@ class ExitCode:
     FILE_ERROR = 2
 
 
-VALID_SEVERITIES = frozenset({"none", "low", "medium", "high"})
+VALID_SEVERITIES = frozenset({"none", "low", "medium", "high", "n/a"})
 REQUIRED_FIELDS = frozenset({"question_id", "passed", "severity", "vulnerability"})
 
 # Sorting order for question ID prefixes
@@ -85,6 +93,17 @@ def validate_entry(entry, index):
         errors.append(
             f"entry[{index}].severity: invalid value '{entry['severity']}', "
             f"expected one of: {', '.join(sorted(VALID_SEVERITIES))}"
+        )
+
+    if (
+        "severity" in entry
+        and entry.get("severity") == "n/a"
+        and "passed" in entry
+        and entry.get("passed") is False
+    ):
+        errors.append(
+            f"entry[{index}].severity: n/a requires passed=true "
+            f"(not applicable questions are not failures)"
         )
 
     return errors
@@ -249,6 +268,7 @@ def generate_json_output(entries, version, date_str, warnings):
     medium_count = sum(1 for e in entries if e["severity"] == "medium")
     low_count = sum(1 for e in entries if e["severity"] == "low")
     none_count = sum(1 for e in entries if e["severity"] == "none")
+    na_count = sum(1 for e in entries if e["severity"] == "n/a")
     passed_count = sum(1 for e in entries if e["passed"])
     total = len(entries)
 
@@ -260,11 +280,13 @@ def generate_json_output(entries, version, date_str, warnings):
             "total": total,
             "passed": passed_count,
             "failed": total - passed_count,
+            "not_applicable": na_count,
             "by_severity": {
                 "high": high_count,
                 "medium": medium_count,
                 "low": low_count,
                 "none": none_count,
+                "n/a": na_count,
             },
         },
         "convergence": {

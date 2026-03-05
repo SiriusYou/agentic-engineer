@@ -33,5 +33,6 @@ run_spec_lint() {
 
 run_spec_lint "$PROJECT_DIR/spec/spec_final.md"
 run_spec_lint "$PROJECT_DIR/spec/spec-lint/spec_final.md"
+run_spec_lint "$PROJECT_DIR/spec/gpt-researcher/spec_final.md"
 
 echo "✓ agentic-engineer spec-lint smoke passed"

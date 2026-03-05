@@ -39,7 +39,7 @@ agentic-engineer/
 │   └── stress-test-prompts.md   # 压力测试 Prompt 库
 ├── tools/                       # CLI 工具
 │   ├── scorecard_parser.py      # Scorecard JSON → 漏洞报告
-│   ├── test_scorecard_parser.py # scorecard 测试（78 个）
+│   ├── test_scorecard_parser.py # scorecard 测试（85 个）
 │   ├── check_workflow_consistency.py  # 文档一致性检查器
 │   └── test_check_workflow_consistency.py  # 一致性检查器测试（53 个）
 ├── scripts/                     # 自动化脚本
@@ -99,7 +99,9 @@ python3 tools/scorecard_parser.py spec/scorecard_v1.json --format json
 python3 tools/scorecard_parser.py spec/scorecard_v1.json --format json --output report.json
 ```
 
-输出包括：通过/未通过统计、严重度分布、收敛判断、具体漏洞详情。
+输出包括：通过/未通过统计、严重度分布（含 `n/a` 不适用标记）、收敛判断、具体漏洞详情。
+
+> **n/a severity**：标记不适用于当前项目的压测题（如功能级 MVP 无持久化时的数据层问题）。n/a 条目需要 `passed: true`，不影响收敛判断。
 
 ### spec_lint — SDD 规范检查器
 

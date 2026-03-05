@@ -7,6 +7,7 @@
 | completed | TRACK-003 | 方法论迭代 + 二次闭环 | 2026-03-03 | 2026-03-04 |
 | completed | TRACK-004 | spec-lint 工程化收口 | 2026-03-04 | 2026-03-04 |
 | completed | TRACK-005 | 泛化验证 — 全栈项目闭环 (gpt-researcher) | 2026-03-04 | 2026-03-05 |
+| completed | TRACK-006 | 模板迭代 — TRACK-005 postmortem 行动项落实 | 2026-03-05 | 2026-03-05 |
 
 <!-- Tracks registered by /conductor:new-track -->
 
@@ -126,3 +127,25 @@
 - 步骤被持续跳过
 
 **状态：** completed — 5-step cycle 全流程闭环，方法论泛化验证通过
+
+---
+
+## TRACK-006: 模板迭代 — TRACK-005 postmortem 行动项落实
+
+**目标：** 落实 TRACK-005 postmortem 的 5 个行动项，提升方法论模板和工具的易用性。
+
+**交付物：**
+- template_01 增加"代码库探索"输入模式
+- template_02 增加"继承目标项目栈"选项 + spec_lint 速查链接
+- template_03 增加"功能级 MVP"压测子集指引 + n/a severity
+- scorecard_parser 增加 n/a severity 支持
+- sdd-template.md 追加 spec_lint 格式速查表
+- pre-push + CI 补齐 gpt-researcher spec-lint smoke
+
+**验收标准：**
+- 192 tests passing（含 n/a 新增测试）
+- 一致性检查 0 failed
+- pre-push hook 通过
+- postmortem 行动项全部勾选
+
+**状态：** completed — 5 个行动项全部落实，192 tests + 76 consistency checks 全绿

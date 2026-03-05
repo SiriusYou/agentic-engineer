@@ -99,11 +99,11 @@
 
 | 编号 | 行动项 | 来源 | 状态 |
 |------|--------|------|------|
-| 1 | 在 template_03 中增加"功能级 MVP"压测子集指引（通用 + 相关层，跳过 N/A 层） | Start #1 | □ 待办 |
-| 2 | 在 template_02 tech-stack 段增加"继承目标项目栈"选项 | Start #2 | □ 待办 |
-| 3 | 在 template_01 增加"代码库探索"输入模式（与"语音转录"并列） | 开放式 #2 | □ 待办 |
-| 4 | scorecard_parser 增加 "n/a" severity 选项 | 开放式 #5 | □ 待办 |
-| 5 | spec_lint 格式要求文档化为速查表，供 SDD 作者在 Step 2 开始前参考 | 开放式 #4 | □ 待办 |
+| 1 | 在 template_03 中增加"功能级 MVP"压测子集指引（通用 + 相关层，跳过 N/A 层） | Start #1 | ✅ TRACK-006 |
+| 2 | 在 template_02 tech-stack 段增加"继承目标项目栈"选项 | Start #2 | ✅ TRACK-006 |
+| 3 | 在 template_01 增加"代码库探索"输入模式（与"语音转录"并列） | 开放式 #2 | ✅ TRACK-006 |
+| 4 | scorecard_parser 增加 "n/a" severity 选项 | 开放式 #5 | ✅ TRACK-006 |
+| 5 | spec_lint 格式要求文档化为速查表，供 SDD 作者在 Step 2 开始前参考 | 开放式 #4 | ✅ TRACK-006 |
 
 ---
 

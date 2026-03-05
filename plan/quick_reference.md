@@ -8,7 +8,7 @@
 ```
 Step 1  灵感捕获          WisprFlow 录音 → template_01 → raw_requirements.md
           │
-Step 2  SDD 生成          新建 Gemini → template_02 → spec_v1.md
+Step 2  SDD 生成          新建 Gemini → template_02 → spec_v1.md  (先看 skills/sdd-template.md 末尾速查)
           │
 Step 3  压力测试          全新 Gemini（必须新窗口）→ template_03 → scorecard_v1.json + stress_test_v1.md
           │
