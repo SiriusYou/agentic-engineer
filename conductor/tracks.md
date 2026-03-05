@@ -6,6 +6,7 @@
 | completed | TRACK-002 | 工程护栏 + 工具链增强 | 2026-03-02 | 2026-03-03 |
 | completed | TRACK-003 | 方法论迭代 + 二次闭环 | 2026-03-03 | 2026-03-04 |
 | completed | TRACK-004 | spec-lint 工程化收口 | 2026-03-04 | 2026-03-04 |
+| active | TRACK-005 | 泛化验证 — 全栈项目闭环 (gpt-researcher) | 2026-03-04 | 2026-03-04 |
 
 <!-- Tracks registered by /conductor:new-track -->
 
@@ -91,3 +92,37 @@
 - 工作树干净，所有测试绿色
 
 **状态：** completed — pre-push + CI dogfood + README + SDD 模板标准化 + postmortem 闭合
+
+---
+
+## TRACK-005: 泛化验证 — 全栈项目闭环 (gpt-researcher)
+
+**目标：** 在完全不同域的全栈项目上运行完整 SDD 5-step cycle，验证方法论泛化能力。
+
+**Pilot 项目：** gpt-researcher (`~/dev/gpt-researcher`) — Python + FastAPI + Next.js 全栈 AI 研究 agent 应用
+- 多 agent 系统 (LangGraph)、WebSocket 实时通信、20+ 搜索引擎集成
+- 与 agentic-engineer 自身 CLI 工具完全不同域，验证泛化能力
+
+**Feature (MVP)：** 输出与 prompt 对齐评分 + 不满足时自动重试
+- 评估研究输出是否匹配输入 prompt 要求，不满足阈值时自动迭代改进
+- 后续再扩展 hooks/skills/脚本等完整机制
+
+**产出目录：** `spec/gpt-researcher/`
+
+**预期产物：**
+- `spec/gpt-researcher/` 完整产物链（raw_requirements → spec → scorecard → stress_test → spec_final → postmortem）
+- 量化指标：收敛轮次、有效问题发现率、SDD 耗时 vs 编码耗时
+- 与 TRACK-001/003 的对比表
+- 模板变更提案（不直接改模板）
+
+**验收标准：**
+- Quality gates all green on pilot spec
+- 完整 5-step cycle completed with postmortem
+- 清晰的量化对比（与前几轮 track 对比）
+
+**失败信号：**
+- 模板需要 >50% 重写以适配全栈上下文
+- SDD 耗时超过编码耗时
+- 步骤被持续跳过
+
+**状态：** active

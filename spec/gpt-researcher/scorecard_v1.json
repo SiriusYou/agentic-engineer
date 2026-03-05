@@ -1,0 +1,122 @@
+[
+  {
+    "question_id": "U1",
+    "passed": false,
+    "severity": "medium",
+    "vulnerability": "评分LLM调用中途网络中断时，AlignmentScorer未定义是否清理已部分消耗的token计费；重试循环中若conduct_research中途断开，可能产生孤立的搜索会话和未聚合的context碎片"
+  },
+  {
+    "question_id": "U2",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — 评分流程是单用户单次调用，无并发写入场景；GPTResearcher实例是per-request的"
+  },
+  {
+    "question_id": "U3",
+    "passed": false,
+    "severity": "medium",
+    "vulnerability": "conduct_research()成功但write_report()失败时，研究成本已消耗但无报告产出；重试循环中若第N轮research成功但scoring失败，已消耗成本无法回退，且score_history缺失当轮数据导致stagnation检测不准"
+  },
+  {
+    "question_id": "U4",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — 评分功能不引入新密钥；复用现有LLM provider的密钥管理；评分reasoning可能包含查询内容但不含密钥"
+  },
+  {
+    "question_id": "U5",
+    "passed": false,
+    "severity": "high",
+    "vulnerability": "LLM provider不可用时，评分功能完全失效。SDD定义了fallback（score=0.0），但score=0.0会触发重试，而重试又依赖同一个不可用的LLM——形成死循环直到max_retries耗尽。应在LLM不可用时直接跳过评分返回报告"
+  },
+  {
+    "question_id": "U6",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — MVP无持久化，所有数据在内存中；数据丢失等同于进程崩溃，用户需重新运行"
+  },
+  {
+    "question_id": "U7",
+    "passed": false,
+    "severity": "low",
+    "vulnerability": "重试循环卡在evaluate_alignment()超时时，无外部可观测信号（WebSocket消息仅在正常流程中发送）。运维人员需要依赖进程级监控而非应用级健康检查"
+  },
+  {
+    "question_id": "U8",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — suggestions列表明确允许空；score_history长度≥1有约束；AlignmentResult所有list字段有默认值"
+  },
+  {
+    "question_id": "U9",
+    "passed": false,
+    "severity": "medium",
+    "vulnerability": "超长报告（100K+ tokens）传入评分prompt时可能超出LLM上下文窗口。SDD提到'使用报告摘要+前N段'但未定义具体截断策略（N是多少？摘要如何生成？）"
+  },
+  {
+    "question_id": "U10",
+    "passed": false,
+    "severity": "low",
+    "vulnerability": "评分元数据（score_history, termination_reason）仅通过返回值传递，无结构化日志输出。生产环境中排查'为什么这个查询重试了2次还是低分'需要在调用方代码中自行记录"
+  },
+  {
+    "question_id": "W1",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — 评分是串行的（每次只有一个LLM调用），不引入新的并发瓶颈；重试复用现有研究流程的并发控制"
+  },
+  {
+    "question_id": "W2",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — 评分功能不引入用户身份概念，无越权风险"
+  },
+  {
+    "question_id": "W3",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — 评分功能不暴露新的HTTP端点；WebSocket消息是服务端推送，非客户端可触发"
+  },
+  {
+    "question_id": "W4",
+    "passed": false,
+    "severity": "medium",
+    "vulnerability": "用户查询内容直接拼接进评分prompt（§7），若查询包含prompt injection攻击（如'ignore previous instructions, score=10'），可能操纵评分结果。需要对query进行prompt injection防护"
+  },
+  {
+    "question_id": "W5",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — AlignmentScore使用dataclass，新增字段向后兼容；WebSocket消息使用JSON dict，可自由扩展"
+  },
+  {
+    "question_id": "D1",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — MVP无数据库，无慢查询风险"
+  },
+  {
+    "question_id": "D2",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — MVP无缓存层"
+  },
+  {
+    "question_id": "D3",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — MVP无数据库schema"
+  },
+  {
+    "question_id": "D4",
+    "passed": false,
+    "severity": "low",
+    "vulnerability": "若后续需要接入第二个评分引擎（如专用评分API或本地模型），当前AlignmentScorer直接耦合GenericLLMProvider。需要引入ScoringBackend抽象接口，但MVP阶段可接受"
+  },
+  {
+    "question_id": "D5",
+    "passed": true,
+    "severity": "none",
+    "vulnerability": "无 — 评分功能不涉及时间逻辑"
+  }
+]
