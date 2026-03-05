@@ -95,12 +95,7 @@ def validate_entry(entry, index):
             f"expected one of: {', '.join(sorted(VALID_SEVERITIES))}"
         )
 
-    if (
-        "severity" in entry
-        and entry.get("severity") == "n/a"
-        and "passed" in entry
-        and entry.get("passed") is False
-    ):
+    if entry.get("severity") == "n/a" and entry.get("passed") is False:
         errors.append(
             f"entry[{index}].severity: n/a requires passed=true "
             f"(not applicable questions are not failures)"
