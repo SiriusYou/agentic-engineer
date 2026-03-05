@@ -9,6 +9,7 @@
 | completed | TRACK-005 | 泛化验证 — 全栈项目闭环 (gpt-researcher) | 2026-03-04 | 2026-03-05 |
 | completed | TRACK-006 | 模板迭代 — TRACK-005 postmortem 行动项落实 | 2026-03-05 | 2026-03-05 |
 | completed | TRACK-007 | 外部项目 Step 5 编码验证 (gpt-researcher) | 2026-03-05 | 2026-03-05 |
+| completed | TRACK-008 | 方法论产品化 — spec-driven-dev Claude Code Skill | 2026-03-05 | 2026-03-05 |
 
 <!-- Tracks registered by /conductor:new-track -->
 
@@ -200,3 +201,24 @@ SDD 耗时基准 ~60min，编码预估 4-8h，warning 线在预估中位，fail 
 - 若触发选项 D（紧急新项目），仍需在本仓 `spec/[项目名]/postmortem_vN.md` 记录执行证据
 
 **状态：** completed — 39/39 behavior items 实现，28 tests passing，spec 偏差率 5.1%，编码耗时 0.75x SDD
+
+---
+
+## TRACK-008: 方法论产品化 — spec-driven-dev Claude Code Skill
+
+**目标：** 将 7 轮验证的 SDD 方法论打包为 Claude Code skill，让任何用户可安装使用。
+
+**交付物：**
+- Skill 核心入口 SKILL.md（英文，<500 lines）
+- templates/ × 5 — 英文化 prompt 模板（Step 0-4）
+- references/ × 5 — 英文化参考文档（workflow, SDD template, stress test, execution, quick ref）
+- scripts/ × 3 — 独立工具（scorecard_parser, spec_lint, check_consistency），纯 stdlib
+- README.md — 新增 skill 安装章节
+
+**验收标准：**
+1. Skill 发现：新 session 输入 "spec driven dev" → skill 被匹配
+2. 脚本可执行：`python3 scripts/scorecard_parser.py --help` 正常输出
+3. 脚本可执行：`python3 scripts/spec_lint.py --help` 正常输出
+4. 主仓门禁：pre-push + CI 保持全绿
+
+**状态：** completed — 14 files delivered (1 SKILL.md + 5 templates + 5 references + 3 scripts), pre-push gate 86/0/0, SKILL.md 280 lines

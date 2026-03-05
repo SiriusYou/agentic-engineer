@@ -162,6 +162,43 @@ bash scripts/pre-push-check.sh
 
 ---
 
+## Installation as Claude Code Skill
+
+Install the methodology as a Claude Code skill for use in any project:
+
+```bash
+# Clone the repository
+git clone https://github.com/SiriusYou/agentic-engineer.git
+
+# Copy the skill to your Claude Code skills directory
+cp -r agentic-engineer/dist/spec-driven-dev ~/.claude/skills/
+```
+
+Or manually copy the `~/.claude/skills/spec-driven-dev/` directory from this repo.
+
+### Usage
+
+Once installed, Claude Code will automatically discover the skill when you mention:
+- "spec driven dev", "SDD", "design doc", "stress test the spec"
+- "execute the spec", "build from spec", "implement this design"
+- "60/40 workflow", "spec lint", "adversarial review"
+
+The skill includes:
+- **SKILL.md** — Core workflow reference (auto-loaded on trigger)
+- **templates/** — Step-by-step prompt templates for each phase
+- **references/** — Detailed documentation (loaded on demand)
+- **scripts/** — CLI tools: `scorecard_parser.py`, `spec_lint.py`, `check_consistency.py`
+
+### Quick Start with Skill
+
+```
+I want to plan a new project using spec-driven development.
+```
+
+Claude Code will load the skill and guide you through the 5-step workflow.
+
+---
+
 ## 补充流程
 
 - **变更请求（CR）：** `spec_final.md` 锁定后需修改时的流程，详见 `plan/quick_reference.md`
