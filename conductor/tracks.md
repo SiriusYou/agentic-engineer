@@ -222,3 +222,11 @@ SDD 耗时基准 ~60min，编码预估 4-8h，warning 线在预估中位，fail 
 4. 主仓门禁：pre-push + CI 保持全绿
 
 **状态：** completed — 14 files delivered (1 SKILL.md + 5 templates + 5 references + 3 scripts), pre-push gate 86/0/0, SKILL.md 280 lines
+
+---
+
+## Backlog
+
+- Behavior inventory template standardization (TRACK-007 postmortem #2, Medium priority)
+- "Recommended implementation path" SDD template hint (TRACK-007 postmortem #1, Low)
+- README English translation for consistency with English skill (Low)

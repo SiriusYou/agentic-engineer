@@ -39,3 +39,16 @@ jobs:
           python tools/spec_lint.py spec/spec-lint/spec_final.md
           python tools/spec_lint.py spec/gpt-researcher/spec_final.md
           python tools/spec_lint.py --format json spec/spec-lint/spec_final.md | python -c 'import json,sys;json.load(sys.stdin)'
+
+      - name: dist smoke
+        run: |
+          set -euo pipefail
+          test -f dist/spec-driven-dev/SKILL.md
+          python dist/spec-driven-dev/scripts/scorecard_parser.py --help
+          python dist/spec-driven-dev/scripts/spec_lint.py --help
+          python dist/spec-driven-dev/scripts/check_consistency.py --help
+          # MANIFEST integrity
+          cd dist/spec-driven-dev
+          EXPECTED=$(grep -v '^#' MANIFEST)
+          ACTUAL=$(find . -type f -not -name MANIFEST -not -path './.omc/*' | LC_ALL=C sort | xargs shasum -a 256)
+          test "$EXPECTED" = "$ACTUAL"

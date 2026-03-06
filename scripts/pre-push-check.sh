@@ -36,3 +36,38 @@ run_spec_lint "$PROJECT_DIR/spec/spec-lint/spec_final.md"
 run_spec_lint "$PROJECT_DIR/spec/gpt-researcher/spec_final.md"
 
 echo "✓ agentic-engineer spec-lint smoke passed"
+
+echo ""
+echo "─── agentic-engineer: dist/ smoke ───"
+
+DIST_DIR="$PROJECT_DIR/dist/spec-driven-dev"
+
+# SKILL.md exists
+if [ ! -f "$DIST_DIR/SKILL.md" ]; then
+    echo "✗ dist/spec-driven-dev/SKILL.md not found"
+    exit 1
+fi
+
+# All 3 scripts present and respond to --help
+for script in scorecard_parser.py spec_lint.py check_consistency.py; do
+    if ! python3 "$DIST_DIR/scripts/$script" --help > /dev/null 2>&1; then
+        echo "✗ dist script $script --help failed"
+        exit 1
+    fi
+done
+
+# MANIFEST integrity: recompute and compare
+MANIFEST_FILE="$DIST_DIR/MANIFEST"
+if [ ! -f "$MANIFEST_FILE" ]; then
+    echo "✗ dist/spec-driven-dev/MANIFEST not found"
+    exit 1
+fi
+
+EXPECTED=$(cd "$DIST_DIR" && grep -v '^#' MANIFEST)
+ACTUAL=$(cd "$DIST_DIR" && find . -type f -not -name MANIFEST -not -path './.omc/*' | LC_ALL=C sort | xargs shasum -a 256)
+if [ "$EXPECTED" != "$ACTUAL" ]; then
+    echo "✗ MANIFEST integrity check failed — checksums do not match"
+    exit 1
+fi
+
+echo "✓ agentic-engineer dist/ smoke passed"

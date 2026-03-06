@@ -174,7 +174,7 @@ git clone https://github.com/SiriusYou/agentic-engineer.git
 cp -r agentic-engineer/dist/spec-driven-dev ~/.claude/skills/
 ```
 
-Or manually copy the `~/.claude/skills/spec-driven-dev/` directory from this repo.
+The `dist/spec-driven-dev/` directory in this repo is the canonical source of truth.
 
 ### Usage
 

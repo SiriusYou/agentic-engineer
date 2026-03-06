@@ -1,0 +1,19 @@
+# Bootstrap: copied from ~/.claude/skills/spec-driven-dev/
+# Source commit: 535e59f (TRACK-008)
+# Date: 2026-03-05
+#
+87d3cbf7f26337026d2ad4673be5749d638120e27dd89538b97b28f33351f1e0  ./.gitignore
+0a81be7847468bdd9cfec57bb54734b3a8137bd218a600625301a93d1616576a  ./SKILL.md
+062a371e55891964f1129b711207c90032413207d2b0b9d6a759e4d57561e3f5  ./references/execution-workflow.md
+ea47e8ac67caa4525dd80a40d82cf147acc773d8ecc091c8ff6c33c3e3c5beb2  ./references/planning-workflow.md
+ccc9023c135a086b0f17e639caf387ba3276d5491ed84295a8d28d0c71d2221d  ./references/quick-reference.md
+65dbf93fc19812ecd63f5c23fa789e027bfda286fe908675cc62d125a0cc9ab7  ./references/sdd-template.md
+62a08608ba2cfe4265bb67285c83ee774eae3a3b9fec70ec11060169fc0c958e  ./references/stress-test-prompts.md
+27b9eee7aa0336198825bdec2c3ee503b6878b9a99b51ae1589455ded4febe82  ./scripts/check_consistency.py
+ec58a4f514d8f648e353ab8897134ac05b0ccea74a042a3a7b3bf08a9529b90e  ./scripts/scorecard_parser.py
+d2652353235bb3de454d87c788c9e64d4271d43a1a3e7a14777c98cd3a5d2847  ./scripts/spec_lint.py
+0247b35982cbdc103ead751dffb7c9bcfb44fe8f2e7d88a93c866550fbd1cfec  ./templates/step0_postmortem.md
+3e8ef3097d1359d6ac8c87a7b01b538e88cda0842353bfcb9c04ad2c5b4ac021  ./templates/step1_inspiration.md
+a1ce697cd342fe0d6f7ef7b3370473ee5c31053fcaff341ef75a9b34e69c5251  ./templates/step2_sdd_gen.md
+c956d599e3fe4351064739350cf5ccc19f31d02289d40bf127da8e71a0435110  ./templates/step3_stress_test.md
+924f3b166cd4fb2106c90d3f849c37142288abcc7c6024d956cae21a4d2e5107  ./templates/step4_iteration.md
